@@ -27,8 +27,8 @@ class linear:
     
     def load_weights(self, filename):
         data = np.load(filename)
-        self.weight = data["weight"]
-        self.bias = data["bias"]
+        self.weights = data["weights"]
+        self.biases = data["biases"]
 
 def softmax(x, derivative=False):
     if not derivative:
@@ -48,18 +48,11 @@ target = np.array([0,0,1])
 
 layerone = linear(3,5)
 layertwo = linear(5,3)
-for s in range(20):
-    x = relu(layerone.propagate_forward(ins))
-    x = softmax(layertwo.propagate_forward(x))
 
-    error = x - target 
+layerone.load_weights("layerone.npz")
+layertwo.load_weights("layertwo.npz")
 
-    layertwo.propagate_backward(error)
-    y = layertwo.find_derivative(error) *  relu(layerone.propagate_forward(ins),True)
-    layerone.propagate_backward(y)
-
-    print(error)
+x = relu(layerone.propagate_forward(ins))
+x = softmax(layertwo.propagate_forward(x))
 
 print(x)
-layerone.save_weights("layerone")
-layertwo.save_weights("layertwo")
