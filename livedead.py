@@ -1,4 +1,17 @@
+import os
+import csv
+
 import numpy as np
+
+character_embeddings = {}
+
+C_PATH = os.path.dirname(__file__)
+embedding_filepath = os.path.join(C_PATH, 'character_embeddings.csv')
+
+with open(embedding_filepath, 'r') as f:
+    unstructured_character_embeddings = csv.reader(f)
+    for row in unstructured_character_embeddings:
+        character_embeddings[row[0]] = row[1:]
 
 class linear:
     def __init__(self, previous_nodes, next_nodes):
@@ -12,7 +25,7 @@ class linear:
         output = product + self.biases
         return output
     
-    def propagate_backward(self, error, lr=1):
+    def propagate_backward(self, error, lr=0.1):
         dw = np.matmul(self.previous_activations.T, error)
         db = np.sum(error, axis=0)
         self.weights -= dw * lr
@@ -27,8 +40,8 @@ class linear:
     
     def load_weights(self, filename):
         data = np.load(filename)
-        self.weights = data["weights"]
-        self.biases = data["biases"]
+        self.weight = data["weight"]
+        self.bias = data["bias"]
 
 def softmax(x, derivative=False):
     if not derivative:
@@ -43,16 +56,29 @@ def relu(x,derivative = False):
     else:
         return (x > 0).astype(float)
 
-ins = np.array([[0.1,1,1]])
-target = np.array([0,0,1])
+def format_input(word):
+    formatted_input = np.zeros((1,696))
+    matrix_index = 0
+    for character in word:
+        character_vector = character_embeddings[character]
+        for dimension_value in character_vector:
+            formatted_input[0][matrix_index] = dimension_value
+            matrix_index += 1
+    return formatted_input
 
-layerone = linear(3,5)
-layertwo = linear(5,3)
+def train(iteration):
+    
 
-layerone.load_weights("layerone.npz")
-layertwo.load_weights("layertwo.npz")
+    for current_iteration in range(iteration):
+        activation_one = relu(layerone.propagate_forward(training_input))
+        activation_two = softmax(layertwo.propagate_forward(x))
 
-x = relu(layerone.propagate_forward(ins))
-x = softmax(layertwo.propagate_forward(x))
+        error = activation_two - target
 
-print(x)
+        layertwo.propagate_backward(error)
+        second_backpropagation_value = layertwo.find_derivative(error) *  relu(layerone.propagate_forward(training_input),True)
+        layerone.propagate_backward(y)
+
+        return error
+
+print()

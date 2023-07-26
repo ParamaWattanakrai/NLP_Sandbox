@@ -63,3 +63,4 @@ for s in range(20):
 print(x)
 layerone.save_weights("layerone")
 layertwo.save_weights("layertwo")
+print(ins)
