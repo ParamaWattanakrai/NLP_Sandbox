@@ -94,8 +94,8 @@ def complete_forward(input_vector):
     activation_two = softmax(layertwo.propagate_forward(activation_one))
     return activation_two
 
-layerone = linear(696,100)
-layertwo = linear(100,2)
+layerone = linear(696,50)
+layertwo = linear(50,2)
 
 training_input = np.zeros((1,696))
 training_target = np.zeros((1,2))
