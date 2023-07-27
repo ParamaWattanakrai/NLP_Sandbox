@@ -1,8 +1,14 @@
-import numpy as np
+import random
 
-training_target = np.zeros((1,2))
-formatted_target = np.zeros((1,2))
-formatted_target[0][1] = 1.
-training_target = np.concatenate((training_target, formatted_target), axis=0)
+# Sample dictionary
+my_dict = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5}
 
-print(training_target)
+# Get the keys of the dictionary as a list
+keys_list = list(my_dict.keys())
+
+# Shuffle the keys list in place
+random.shuffle(keys_list)
+
+# Access the elements of the dictionary in the shuffled order
+for key in keys_list:
+    print(key, my_dict[key])

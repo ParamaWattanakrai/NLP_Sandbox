@@ -1,6 +1,7 @@
 import os
 import csv
 
+import random
 import numpy as np
 
 np.random.seed(428)
@@ -20,6 +21,8 @@ with open(embedding_filepath, 'r', encoding='utf-8') as f:
 with open(dataset_filepath, 'r', encoding='utf-8') as f:
     unstructured_dataset = csv.reader(f)
     for row in unstructured_dataset:
+        if len(row[0]) != 3:
+            continue
         dataset_dict[row[0]] = row[1:]
 
 class linear:
@@ -94,12 +97,30 @@ def complete_forward(input_vector):
     activation_two = softmax(layertwo.propagate_forward(activation_one))
     return activation_two
 
-layerone = linear(696,50)
-layertwo = linear(50,2)
+def kfold_train(training_input, training_target, folds, iteration):
+    split_input = np.array_split(training_input, folds, axis=0)
+    split_target = np.array_split(training_target, folds, axis=0)
+
+    print(train(split_input[0], split_target[0], 1))
+
+    for k in range(folds):
+        train(split_input[k], split_target[k], iteration)
+
+    # for k in range(folds):
+    #     training_set_input = np.delete(split_input, k, axis=0)
+    #     training_set_target = np.delete(split_output, k, axis=0)
+    #     train(training_set_input, training_set_target, iteration)
+
+layerone = linear(696,5)
+layertwo = linear(5,2)
 
 training_input = np.zeros((1,696))
 training_target = np.zeros((1,2))
-for input_key in dataset_dict:
+
+shuffled_dataset_keys = list(dataset_dict.keys())
+random.shuffle(shuffled_dataset_keys)
+
+for input_key in shuffled_dataset_keys:
 
     formatted_input = format_input(input_key)
     formatted_target = np.zeros((1,2))
@@ -116,6 +137,6 @@ for input_key in dataset_dict:
 training_input = np.delete(training_input, 0, axis=0)
 training_target = np.delete(training_target, 0, axis=0)
 
-print(train(training_input, training_target, 10))
+print(kfold_train(training_input, training_target, 57, 5))
 
-print(complete_forward(format_input('โดย')))
+print(complete_forward(format_input('ลัก')))
