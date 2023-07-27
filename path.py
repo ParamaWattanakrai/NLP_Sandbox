@@ -8,7 +8,7 @@ character_embeddings = {}
 C_PATH = os.path.dirname(__file__)
 embedding_filepath = os.path.join(C_PATH, 'character_embeddings.csv')
 
-with open(embedding_filepath, 'r') as f:
+with open(embedding_filepath, 'r', encoding='utf-8') as f:
     unstructured_character_embeddings = csv.reader(f)
     for row in unstructured_character_embeddings:
         character_embeddings[row[0]] = row[1:]
@@ -23,5 +23,5 @@ def format_input(word):
             matrix_index += 1
     return formatted_input
 
-ins = format_input('เคราะห์')
-print(ins)
+for key in character_embeddings:
+    print(character_embeddings[key])

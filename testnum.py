@@ -1,8 +1,8 @@
 import numpy as np
-a = np.zeros((1,112))
-j = 0
-# for i in a[0]:
-#     print(j)
-#     j = j + 1
-a[0][0] = 1
-print(a)
+
+training_target = np.zeros((1,2))
+formatted_target = np.zeros((1,2))
+formatted_target[0][1] = 1.
+training_target = np.concatenate((training_target, formatted_target), axis=0)
+
+print(training_target)

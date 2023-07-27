@@ -3,15 +3,24 @@ import csv
 
 import numpy as np
 
+np.random.seed(428)
+
 character_embeddings = {}
+dataset_dict = {}
 
 C_PATH = os.path.dirname(__file__)
 embedding_filepath = os.path.join(C_PATH, 'character_embeddings.csv')
+dataset_filepath = os.path.join(C_PATH, 'livedead.csv')
 
-with open(embedding_filepath, 'r') as f:
+with open(embedding_filepath, 'r', encoding='utf-8') as f:
     unstructured_character_embeddings = csv.reader(f)
     for row in unstructured_character_embeddings:
         character_embeddings[row[0]] = row[1:]
+
+with open(dataset_filepath, 'r', encoding='utf-8') as f:
+    unstructured_dataset = csv.reader(f)
+    for row in unstructured_dataset:
+        dataset_dict[row[0]] = row[1:]
 
 class linear:
     def __init__(self, previous_nodes, next_nodes):
@@ -25,11 +34,11 @@ class linear:
         output = product + self.biases
         return output
     
-    def propagate_backward(self, error, lr=0.1):
-        dw = np.matmul(self.previous_activations.T, error)
-        db = np.sum(error, axis=0)
-        self.weights -= dw * lr
-        self.biases -= db * lr
+    def propagate_backward(self, error, learning_rate=0.1):
+        derivative_of_weights = np.matmul(self.previous_activations.T, error)
+        derivative_of_biases = np.sum(error, axis=0)
+        self.weights -= derivative_of_weights * learning_rate
+        self.biases -= derivative_of_biases * learning_rate
     
     def find_derivative(self, error):
         d = np.dot(error, self.weights.T)
@@ -40,8 +49,8 @@ class linear:
     
     def load_weights(self, filename):
         data = np.load(filename)
-        self.weight = data["weight"]
-        self.bias = data["bias"]
+        self.weights = data["weights"]
+        self.biases = data["biases"]
 
 def softmax(x, derivative=False):
     if not derivative:
@@ -66,19 +75,47 @@ def format_input(word):
             matrix_index += 1
     return formatted_input
 
-def train(iteration):
-    
+def train(training_input, training_target, iteration):
 
     for current_iteration in range(iteration):
         activation_one = relu(layerone.propagate_forward(training_input))
-        activation_two = softmax(layertwo.propagate_forward(x))
+        activation_two = softmax(layertwo.propagate_forward(activation_one))
 
-        error = activation_two - target
+        error = activation_two - training_target
 
         layertwo.propagate_backward(error)
         second_backpropagation_value = layertwo.find_derivative(error) *  relu(layerone.propagate_forward(training_input),True)
-        layerone.propagate_backward(y)
+        layerone.propagate_backward(second_backpropagation_value)
 
         return error
 
-print()
+def complete_forward(input_vector):
+    activation_one = relu(layerone.propagate_forward(input_vector))
+    activation_two = softmax(layertwo.propagate_forward(activation_one))
+    return activation_two
+
+layerone = linear(696,100)
+layertwo = linear(100,2)
+
+training_input = np.zeros((1,696))
+training_target = np.zeros((1,2))
+for input_key in dataset_dict:
+
+    formatted_input = format_input(input_key)
+    formatted_target = np.zeros((1,2))
+
+    if dataset_dict[input_key][0] == '0':
+        formatted_target[0][1] = 1.
+    elif dataset_dict[input_key][0] == '1':
+        formatted_target[0][0] = 1.
+    else:
+        print("Something's wrong")
+
+    training_input = np.concatenate((training_input, formatted_input), axis=0)
+    training_target = np.concatenate((training_target, formatted_target), axis=0)
+training_input = np.delete(training_input, 0, axis=0)
+training_target = np.delete(training_target, 0, axis=0)
+
+print(train(training_input, training_target, 10))
+
+print(complete_forward(format_input('โดย')))
