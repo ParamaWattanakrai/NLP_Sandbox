@@ -1,0 +1,82 @@
+import io
+import os
+import glob
+import csv
+import torch
+import random
+
+character_embeddings = {}
+dataset_dict = {}
+
+C_PATH = os.path.dirname(__file__)
+embedding_filepath = os.path.join(C_PATH, 'character_embeddings.csv')
+
+with open(embedding_filepath, 'r', encoding='utf-8') as f:
+    unstructured_character_embeddings = csv.reader(f)
+    for row in unstructured_character_embeddings:
+        character_embeddings[row[0]] = row[1:]
+
+def load_data():
+    category_lines = {}
+    all_categories = []
+    
+    def find_files(path):
+        return glob.glob(path)
+    
+    def read_lines(filename):
+        lines = io.open(filename, encoding='utf-8').read().strip().split('\n')
+        return [line for line in lines]
+    
+    for filename in find_files('Data/categorys/*.csv'):
+        category = os.path.splitext(os.path.basename(filename))[0]
+        all_categories.append(category)
+        
+        lines = read_lines(filename)
+        category_lines[category] = lines
+        
+    return category_lines, all_categories
+
+def letter_to_tensor(word):
+    letter_tensor = torch.zeros((1, 87))
+    matrix_index = 0
+    for character in word:
+        character_vector = character_embeddings[character]
+        for dimension_value in character_vector:
+            letter_tensor[0][matrix_index] = float(dimension_value)  #
+            matrix_index += 1
+    return letter_tensor
+
+def line_to_tensor(line):
+    line_tensor = torch.zeros(len(line), 1, 87)
+    for i, character in enumerate(line):
+        character_vector = character_embeddings.get(character)
+        if character_vector is not None:
+            for j, dimension_value in enumerate(character_vector):
+                line_tensor[i][0][j] = float(dimension_value)
+    return line_tensor
+
+def random_training_example(category_lines, all_categories):
+    
+    def random_choice(a):
+        random_idx = random.randint(0, len(a) - 1)
+        return a[random_idx]
+    
+    category = random_choice(all_categories)
+    line = random_choice(category_lines[category])
+    category_tensor = torch.tensor([all_categories.index(category)], dtype=torch.long)
+    line_tensor = line_to_tensor(line)
+    return category, line, category_tensor, line_tensor
+
+if __name__ == '__main__':    
+    category_lines, all_categories = load_data()
+    print(category_lines['live'][:5])
+
+    print(letter_to_tensor('ก'))
+    print(line_to_tensor('การ').size())
+
+
+
+
+
+
+
