@@ -16,9 +16,9 @@ with open(embedding_filepath, 'r', encoding='utf-8') as f:
     for row in unstructured_character_embeddings:
         character_embeddings[row[0]] = row[1:]
 
-def load_data():
-    category_lines = {}
-    all_categories = []
+def load_data_train():
+    category_lines_train = {}
+    all_categories_train = []
     
     def find_files(path):
         return glob.glob(path)
@@ -27,14 +27,34 @@ def load_data():
         lines = io.open(filename, encoding='utf-8').read().strip().split('\n')
         return [line for line in lines]
     
-    for filename in find_files('Data/categorys/*.csv'):
+    for filename in find_files('Data/train/*.csv'):
         category = os.path.splitext(os.path.basename(filename))[0]
-        all_categories.append(category)
+        all_categories_train.append(category)
         
         lines = read_lines(filename)
-        category_lines[category] = lines
+        category_lines_train[category] = lines
         
-    return category_lines, all_categories
+    return category_lines_train, all_categories_train
+
+def load_data_test():
+    category_lines_test = {}
+    all_categories_test = []
+    
+    def find_files(path):
+        return glob.glob(path)
+    
+    def read_lines(filename):
+        lines = io.open(filename, encoding='utf-8').read().strip().split('\n')
+        return [line for line in lines]
+    
+    for filename in find_files('Data/test/*.csv'):
+        category = os.path.splitext(os.path.basename(filename))[0]
+        all_categories_test.append(category)
+        
+        lines = read_lines(filename)
+        category_lines_test[category] = lines
+        
+    return category_lines_test, all_categories_test
 
 def letter_to_tensor(word):
     letter_tensor = torch.zeros((1, 16))
@@ -72,8 +92,8 @@ def category_from_output(output, all_categories):
     return all_categories[category_idx]
 
 if __name__ == '__main__':    
-    category_lines, all_categories = load_data()
-    print(category_lines['live'][:5])
+    category_lines_test, all_categories_test = load_data_test()
+    print(category_lines_test['live'][:5])
 
     print(letter_to_tensor('ก'))
     print(line_to_tensor('การ').size())
