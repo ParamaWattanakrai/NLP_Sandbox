@@ -1,7 +1,8 @@
 import torch
 import time
 import torch.nn as nn
-from utils import load_data_train, load_data_test ,line_to_tensor, random_training_example, category_from_output
+from utils import load_data_train, load_data_test, line_to_tensor, random_training_example, category_from_output
+
 class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(RNN, self).__init__()
@@ -19,17 +20,6 @@ class RNN(nn.Module):
     def init_hidden(self):
         return torch.zeros(1, self.hidden_size)
 
-# Load the data
-category_lines_train, all_categories_train = load_data_train()
-category_lines_test, all_categories_test = load_data_test()
-
-n_categories = len(all_categories_train)
-n_hidden = 128
-
-# Initialize RNN
-rnn = RNN(16, n_hidden, n_categories)
-
-# Training function
 def train(line_tensor, category_tensor):
     hidden = rnn.init_hidden()
     rnn.zero_grad()
@@ -44,25 +34,44 @@ def train(line_tensor, category_tensor):
 
     return output, loss.item()
 
+def predict(input_line):
+    with torch.no_grad():
+        line_tensor = line_to_tensor(input_line)
+        hidden = rnn.init_hidden()
+
+        for i in range(line_tensor.size()[0]):
+            output, hidden = rnn(line_tensor[i], hidden)
+
+        guess = category_from_output(output, all_categories_train)
+        print(f"Prediction: {guess}\n")
+
+# Load the data
+category_lines_train, all_categories_train = load_data_train()
+category_lines_test, all_categories_test = load_data_test()
+
+n_categories = len(all_categories_train)
+n_hidden = 128
+
+# Initialize RNN
+rnn = RNN(16, n_hidden, n_categories)
+
 # Initialize the loss function and optimizer
 criterion = nn.NLLLoss()
 learning_rate = 0.005
 optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
 current_loss = 0
-all_losses = []
 
 print_steps = 500
-num_epochs = 10000
+num_epochs = 10000 
 
 correct_predictions = 0
 total_predictions = 0
 
 # Training loop
-print("Strat Training")
+print("Start Training")
 start_time = time.time()
 
 for epoch in range(num_epochs):
-    
     category, line, category_tensor, line_tensor = random_training_example(category_lines_train, all_categories_train)
     
     output, loss = train(line_tensor, category_tensor)
@@ -86,20 +95,15 @@ accuracy = correct_predictions / total_predictions
 print(f"Training time: {training_time:.2f} seconds")
 print(f"Training Accuracy: {accuracy:.2%}\n")
 
-# Prediction function
-def predict(input_line):
-
-    with torch.no_grad():
-        line_tensor = line_to_tensor(input_line)
-        hidden = rnn.init_hidden()
-
-        for i in range(line_tensor.size()[0]):
-            output, hidden = rnn(line_tensor[i], hidden)
-
-        guess = category_from_output(output, all_categories_train)
-        print(f"Prediction: {guess}\n")
+# Save the trained model
+torch.save(rnn.state_dict(), 'trained_rnn_model.pth')
 
 # Testing loop
+# Load the trained model for testing
+rnn = RNN(16, n_hidden, n_categories)
+rnn.load_state_dict(torch.load('trained_rnn_model.pth'))
+rnn.eval()  # Set the model to evaluation mode (turn off dropout and batch normalization)
+
 start_time = time.time()
 
 correct_predictions_test = 0
@@ -133,7 +137,7 @@ test_accuracy = correct_predictions_test / total_predictions_test
 print(f"Testing time: {training_time:.2f} seconds")
 print(f"Test Accuracy: {test_accuracy:.2%}")
 
-print("\nสรุป")
+print("\nสรุปผลบ")
 print(f"Training Accuracy: {accuracy:.2%}")
 print(f"Test Accuracy: {test_accuracy:.2%}")
 

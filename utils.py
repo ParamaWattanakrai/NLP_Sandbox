@@ -76,13 +76,8 @@ def line_to_tensor(line):
     return line_tensor
 
 def random_training_example(category_lines, all_categories):
-    
-    def random_choice(a):
-        random_idx = random.randint(0, len(a) - 1)
-        return a[random_idx]
-    
-    category = random_choice(all_categories)
-    line = random_choice(category_lines[category])
+    category = random.choice(all_categories)
+    line = random.choice(category_lines[category])
     category_tensor = torch.tensor([all_categories.index(category)], dtype=torch.long)
     line_tensor = line_to_tensor(line)
     return category, line, category_tensor, line_tensor
