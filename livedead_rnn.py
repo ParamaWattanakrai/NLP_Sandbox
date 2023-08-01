@@ -1,10 +1,7 @@
 import torch
 import time
 import torch.nn as nn
-# import matplotlib.pyplot as plt
 from utils import load_data, line_to_tensor, random_training_example, category_from_output
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
 class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(RNN, self).__init__()
@@ -29,7 +26,6 @@ n_hidden = 128
 
 # Initialize RNN
 rnn = RNN(16, n_hidden, n_categories)
-rnn.to(device)
 
 # Training function
 def train(line_tensor, category_tensor):
@@ -54,7 +50,7 @@ current_loss = 0
 all_losses = []
 
 print_steps = 500 
-num_epochs = 10000 # ขี้เกียจ Train นานเลยปรับแค่นี้
+num_epochs = 10000 
 
 correct_predictions = 0
 total_predictions = 0
