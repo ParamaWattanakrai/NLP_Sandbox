@@ -2,7 +2,7 @@ import torch
 import time
 import torch.nn as nn
 # import matplotlib.pyplot as plt
-from utils import load_data, line_to_tensor, random_training_example
+from utils import load_data, line_to_tensor, random_training_example, category_from_output
 
 if torch.cuda.is_available():
     # Get the number of available GPUs
@@ -96,12 +96,12 @@ for epoch in range(num_epochs):
         accuracy = correct_predictions / total_predictions
         print(f"{(epoch + 1) / num_epochs * 100:.2f}% Loss: {loss:.4f} Word: {line} / Guess: {guess} --> {correct} Accuracy: {accuracy:.2%}")
 
-plt.figure()
-plt.plot(all_losses)
-plt.xlabel('Iterations')
-plt.ylabel('Loss')
-plt.title('Training Loss')
-plt.show()
+# plt.figure()
+# plt.plot(all_losses)
+# plt.xlabel('Iterations')
+# plt.ylabel('Loss')
+# plt.title('Training Loss')
+# plt.show()
 
 # Prediction function
 def predict(input_line):
