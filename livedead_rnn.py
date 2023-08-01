@@ -1,7 +1,24 @@
 import torch
 import torch.nn as nn
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from utils import load_data, line_to_tensor, random_training_example
+
+if torch.cuda.is_available():
+    # Get the number of available GPUs
+    num_gpus = torch.cuda.device_count()
+    print(f"Number of available GPUs: {num_gpus}")
+
+    # Choose the first GPU (you can choose any available GPU by changing the index)
+    device = torch.device("cuda:0")
+
+    # Set the default tensor type to CUDA tensors
+    torch.set_default_tensor_type(torch.cuda.FloatTensor)
+
+    print("CUDA is available and activated.")
+else:
+    # If CUDA is not available, use the CPU
+    device = torch.device("cpu")
+    print("CUDA is not available. Using CPU.")
 
 class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -67,12 +84,14 @@ for i in range(n_iters):
         correct = "CORRECT" if guess == category else f"WRONG ({category})"
         print(f"{(i+1)/n_iters*100:.2f}% Loss: {loss:.4f} Word: {line} / Guess: {guess} --> {correct}")
 
-plt.figure()
-plt.plot(all_losses)
-plt.xlabel('Iterations')
-plt.ylabel('Loss')
-plt.title('Training Loss')
-plt.show()
+# plt.figure()
+# plt.plot(all_losses)
+# plt.xlabel('Iterations')
+# plt.ylabel('Loss')
+# plt.title('Training Loss')
+# plt.show()
+
+print(all_losses)
 
 def predict(input_line):
     print(f"\n> {input_line}")
