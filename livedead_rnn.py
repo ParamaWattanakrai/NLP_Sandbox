@@ -48,7 +48,7 @@ def train(line_tensor, category_tensor):
 
 # Initialize the loss function and optimizer
 criterion = nn.NLLLoss()
-learning_rate = 0.005
+learning_rate = 0.05
 optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
 current_loss = 0
 all_losses = []
@@ -102,6 +102,9 @@ while True:
     sentence = input(">>> ")
     if sentence.lower() == "ออก":
         break
+    if sentence.lower() == "":
+        print("ใส่คำมาสิไอเปรต")
+        continue
 
     predict(sentence)
 
