@@ -67,6 +67,10 @@ def random_training_example(category_lines, all_categories):
     line_tensor = line_to_tensor(line)
     return category, line, category_tensor, line_tensor
 
+def category_from_output(output, all_categories):
+    category_idx = torch.argmax(output).item()
+    return all_categories[category_idx]
+
 if __name__ == '__main__':    
     category_lines, all_categories = load_data()
     print(category_lines['live'][:5])
