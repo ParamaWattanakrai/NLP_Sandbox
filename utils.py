@@ -42,7 +42,7 @@ def letter_to_tensor(word):
     for character in word:
         character_vector = character_embeddings[character]
         for dimension_value in character_vector:
-            letter_tensor[0][matrix_index] = float(dimension_value)
+            letter_tensor[0][matrix_index] = float(dimension_value)  #
             matrix_index += 1
     return letter_tensor
 
@@ -74,7 +74,6 @@ def category_from_output(output, all_categories):
 if __name__ == '__main__':    
     category_lines, all_categories = load_data()
     print(category_lines['live'][:5])
-    print()
 
     print(letter_to_tensor('ก'))
     print(line_to_tensor('การ').size())
