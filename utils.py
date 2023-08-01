@@ -9,7 +9,7 @@ character_embeddings = {}
 dataset_dict = {}
 
 C_PATH = os.path.dirname(__file__)
-embedding_filepath = os.path.join(C_PATH, 'character_embeddings.csv')
+embedding_filepath = os.path.join(C_PATH, 'thai_character_embedding.csv')
 
 with open(embedding_filepath, 'r', encoding='utf-8') as f:
     unstructured_character_embeddings = csv.reader(f)
@@ -37,7 +37,7 @@ def load_data():
     return category_lines, all_categories
 
 def letter_to_tensor(word):
-    letter_tensor = torch.zeros((1, 87))
+    letter_tensor = torch.zeros((1, 16))
     matrix_index = 0
     for character in word:
         character_vector = character_embeddings[character]
@@ -47,7 +47,7 @@ def letter_to_tensor(word):
     return letter_tensor
 
 def line_to_tensor(line):
-    line_tensor = torch.zeros(len(line), 1, 87)
+    line_tensor = torch.zeros(len(line), 1, 16)
     for i, character in enumerate(line):
         character_vector = character_embeddings.get(character)
         if character_vector is not None:

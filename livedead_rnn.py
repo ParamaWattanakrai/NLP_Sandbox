@@ -1,7 +1,7 @@
 import torch
 import time
 import torch.nn as nn
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from utils import load_data, line_to_tensor, random_training_example, category_from_output
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -28,7 +28,7 @@ n_categories = len(all_categories)
 n_hidden = 128
 
 # Initialize RNN
-rnn = RNN(87, n_hidden, n_categories)
+rnn = RNN(16, n_hidden, n_categories)
 rnn.to(device)
 
 # Training function
