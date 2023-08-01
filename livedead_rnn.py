@@ -60,8 +60,9 @@ total_predictions = 0
 # Training loop
 print("Strat Training")
 start_time = time.time()
-for epoch in range(num_epochs):
 
+for epoch in range(num_epochs):
+    
     category, line, category_tensor, line_tensor = random_training_example(category_lines_train, all_categories_train)
     
     output, loss = train(line_tensor, category_tensor)
@@ -77,9 +78,11 @@ for epoch in range(num_epochs):
     if (epoch + 1) % print_steps == 0:
         accuracy = correct_predictions / total_predictions
         print(f"{(epoch + 1) / num_epochs * 100:.2f}% Loss: {loss:.4f} Word: {line} / Guess: {guess} --> {correct} Accuracy: {accuracy:.2%}")
+
 end_time = time.time()
 training_time = end_time - start_time
 accuracy = correct_predictions / total_predictions
+
 print(f"Training time: {training_time:.2f} seconds")
 print(f"Training Accuracy: {accuracy:.2%}\n")
 
@@ -98,8 +101,10 @@ def predict(input_line):
 
 # Testing loop
 start_time = time.time()
+
 correct_predictions_test = 0
 total_predictions_test = 0
+
 print("Testing...")
 for category in all_categories_test:
     for line in category_lines_test[category]:
@@ -120,9 +125,11 @@ for category in all_categories_test:
 
         correct = "CORRECT" if guess == category else f"WRONG ({category})"
         print(f"Input: {line} / Predicted: {guess} --> {correct}")
+
 end_time = time.time()
 training_time = end_time - start_time
 test_accuracy = correct_predictions_test / total_predictions_test
+
 print(f"Testing time: {training_time:.2f} seconds")
 print(f"Test Accuracy: {test_accuracy:.2%}")
 
