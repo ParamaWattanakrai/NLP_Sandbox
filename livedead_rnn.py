@@ -1,4 +1,5 @@
 import torch
+import time
 import torch.nn as nn
 # import matplotlib.pyplot as plt
 from utils import load_data, line_to_tensor, random_training_example
@@ -24,25 +25,29 @@ class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(RNN, self).__init__()
         self.hidden_size = hidden_size
-        self.i2h = nn.Linear(input_size + hidden_size, hidden_size)
-        self.i2o = nn.Linear(input_size + hidden_size, output_size)
+        self.in2hidden = nn.Linear(input_size + hidden_size, hidden_size)
+        self.in2output = nn.Linear(input_size + hidden_size, output_size)
         self.softmax = nn.LogSoftmax(dim=1)
-
-    def forward(self, input_tensor, hidden_tensor):
-        combined = torch.cat((input_tensor, hidden_tensor), 1)
-        hidden = self.i2h(combined)
-        output = self.i2o(combined)
-        output = self.softmax(output)
+    
+    def forward(self, input, hidden_state):
+        combined = torch.cat((input, hidden_state), 1)
+        hidden = torch.relu(self.in2hidden(combined))
+        output = self.softmax(self.in2output(combined))
         return output, hidden
-
+    
     def init_hidden(self):
         return torch.zeros(1, self.hidden_size)
 
+# Load the data
 category_lines, all_categories = load_data()
 n_categories = len(all_categories)
 n_hidden = 128
-rnn = RNN(87, n_hidden, n_categories)
 
+# Initialize RNN
+rnn = RNN(87, n_hidden, n_categories)
+rnn.to(device)
+
+# Training function
 def train(line_tensor, category_tensor):
     hidden = rnn.init_hidden()
     rnn.zero_grad()
@@ -57,44 +62,49 @@ def train(line_tensor, category_tensor):
 
     return output, loss.item()
 
+# Initialize the loss function and optimizer
 criterion = nn.NLLLoss()
 learning_rate = 0.005
 optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
 current_loss = 0
 all_losses = []
-plot_steps, print_steps = 1000, 5000
-n_iters = 100000
 
-def category_from_output(output):
-    category_idx = torch.argmax(output).item()
-    return all_categories[category_idx]
+print_steps = 500 
+num_epochs = 10000 # ขี้เกียจ Train นานเลยปรับแค่นี้
 
-for i in range(n_iters):
+correct_predictions = 0
+total_predictions = 0
+
+# Training loop
+start_time = time.time()
+
+for epoch in range(num_epochs):
+
     category, line, category_tensor, line_tensor = random_training_example(category_lines, all_categories)
     
     output, loss = train(line_tensor, category_tensor)
     current_loss += loss
 
-    if (i+1) % plot_steps == 0:
-        all_losses.append(current_loss / plot_steps)
-        current_loss = 0
+    guess = category_from_output(output, all_categories)
+    correct = "CORRECT" if guess == category else f"WRONG ({category})"
 
-    if (i+1) % print_steps == 0:
-        guess = category_from_output(output)
-        correct = "CORRECT" if guess == category else f"WRONG ({category})"
-        print(f"{(i+1)/n_iters*100:.2f}% Loss: {loss:.4f} Word: {line} / Guess: {guess} --> {correct}")
+    total_predictions += 1
+    if guess == category:
+        correct_predictions += 1
 
-# plt.figure()
-# plt.plot(all_losses)
-# plt.xlabel('Iterations')
-# plt.ylabel('Loss')
-# plt.title('Training Loss')
-# plt.show()
+    if (epoch + 1) % print_steps == 0:
+        accuracy = correct_predictions / total_predictions
+        print(f"{(epoch + 1) / num_epochs * 100:.2f}% Loss: {loss:.4f} Word: {line} / Guess: {guess} --> {correct} Accuracy: {accuracy:.2%}")
 
-print(all_losses)
+plt.figure()
+plt.plot(all_losses)
+plt.xlabel('Iterations')
+plt.ylabel('Loss')
+plt.title('Training Loss')
+plt.show()
 
+# Prediction function
 def predict(input_line):
-    print(f"\n> {input_line}")
     with torch.no_grad():
         line_tensor = line_to_tensor(input_line)
         hidden = rnn.init_hidden()
@@ -102,12 +112,14 @@ def predict(input_line):
         for i in range(line_tensor.size()[0]):
             output, hidden = rnn(line_tensor[i], hidden)
 
-        guess = category_from_output(output)
-        print(guess)
+        guess = category_from_output(output, all_categories)
+        print(f"Prediction: {guess}\n")
 
 while True:
-    sentence = input("ใส่คำสะ (พิมพ์ 'ออก' เพื่อออก): ")
+    sentence = input(">>> ")
     if sentence.lower() == "ออก":
         break
 
     predict(sentence)
+
+print("Exiting.")
