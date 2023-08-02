@@ -15,10 +15,8 @@ class RNN(nn.Module):
     def forward(self, input, hidden_state):
         combined = torch.cat((input, hidden_state), 1)
         hidden1 = torch.relu(self.in2hidden_first(combined))
-        hidden2 = torch.relu(self.in2hidden(hidden1))
-        hidden3 = torch.relu(self.in2hidden(hidden2))  
-        output = self.softmax(self.in2output(hidden3))
-        return output, hidden3  
+        output = self.softmax(self.in2output(hidden1))
+        return output, hidden1  
     
     def init_hidden(self):
         return torch.zeros(1, self.hidden_size)

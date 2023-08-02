@@ -6,7 +6,6 @@ import torch
 import random
 
 character_embeddings = {}
-dataset_dict = {}
 
 C_PATH = os.path.dirname(__file__)
 embedding_filepath = os.path.join(C_PATH, 'thai_character_embedding.csv')
@@ -88,7 +87,4 @@ def category_from_output(output, all_categories):
 
 if __name__ == '__main__':    
     category_lines_test, all_categories_test = load_data_test()
-    print(category_lines_test['live'][:5])
-
-    print(letter_to_tensor('ก'))
-    print(line_to_tensor('การ').size())
+    print(line_to_tensor('เป็น').size())
