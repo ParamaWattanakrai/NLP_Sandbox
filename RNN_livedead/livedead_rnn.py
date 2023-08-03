@@ -7,19 +7,22 @@ class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(RNN, self).__init__()
         self.hidden_size = hidden_size
-        self.in2hidden_first = nn.Linear(input_size + hidden_size, hidden_size)
-        self.in2hidden = nn.Linear(hidden_size, hidden_size)
-        self.in2output = nn.Linear(hidden_size, output_size)
+        self.relu = nn.ReLU()
+
+        self.hidden_layer1 = nn.Linear(input_size + hidden_size, hidden_size)
+        self.hidden_layer = nn.Linear(hidden_size, hidden_size)
+        self.output_layer = nn.Linear(hidden_size, output_size)
         self.softmax = nn.LogSoftmax(dim=1)
     
     def forward(self, input, hidden_state):
         combined = torch.cat((input, hidden_state), 1)
-        hidden1 = torch.relu(self.in2hidden_first(combined))
-        output = self.softmax(self.in2output(hidden1))
-        return output, hidden1  
+        hidden1 = self.relu(self.hidden_layer1(combined)) 
+        hidden2 = self.relu(self.hidden_layer(hidden1))
+        output = self.softmax(self.output_layer(hidden2))
+        return output, hidden2 
     
-    def init_hidden(self):
-        return torch.zeros(1, self.hidden_size)
+    def init_hidden(self,batch_size=1):
+        return torch.zeros(batch_size, self.hidden_size)
 
 def train(line_tensor, category_tensor):
     hidden = rnn.init_hidden()
@@ -46,17 +49,14 @@ def predict(input_line):
         guess = category_from_output(output, all_categories_train)
         print(f"Prediction: {guess}\n")
 
-# Load the data
 category_lines_train, all_categories_train = load_data_train()
 category_lines_test, all_categories_test = load_data_test()
 
 n_categories = len(all_categories_train)
 n_hidden = 128
 
-# Initialize RNN
 rnn = RNN(16, n_hidden, n_categories)
 
-# Initialize the loss function and optimizer
 criterion = nn.NLLLoss()
 learning_rate = 0.005
 optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
@@ -68,7 +68,6 @@ num_epochs = 10000
 correct_predictions = 0
 total_predictions = 0
 
-# Training loop
 print("Start Training")
 start_time = time.time()
 
@@ -96,14 +95,10 @@ accuracy = correct_predictions / total_predictions
 print(f"Training time: {training_time:.2f} seconds")
 print(f"Training Accuracy: {accuracy:.2%}\n")
 
-# Save the trained model
-torch.save(rnn.state_dict(), 'trained_rnn_model.pth')
-
-# Testing loop
-# Load the trained model for testing
-rnn = RNN(16, n_hidden, n_categories)
-rnn.load_state_dict(torch.load('trained_rnn_model.pth'))
-rnn.eval()  # Set the model to evaluation mode (turn off dropout and batch normalization)
+# torch.save(rnn.state_dict(), 'trained_rnn_model.pth')
+# rnn = RNN(16, n_hidden, n_categories)
+# rnn.load_state_dict(torch.load('trained_rnn_model.pth'))
+# rnn.eval()  
 
 start_time = time.time()
 

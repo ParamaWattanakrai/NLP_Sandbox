@@ -9,61 +9,39 @@ character_embeddings = {}
 
 C_PATH = os.path.dirname(__file__)
 embedding_filepath = os.path.join(C_PATH, 'thai_character_embedding.csv')
+dataTrain_filepath = os.path.join(C_PATH, 'data/train/*.csv')
+dataTest_filepath = os.path.join(C_PATH, 'data/test/*.csv')
 
 with open(embedding_filepath, 'r', encoding='utf-8') as f:
     unstructured_character_embeddings = csv.reader(f)
     for row in unstructured_character_embeddings:
         character_embeddings[row[0]] = row[1:]
 
-def load_data_train():
-    category_lines_train = {}
-    all_categories_train = []
+def find_files(path):
+    return glob.glob(path)
+
+def read_lines(filename):
+    lines = io.open(filename, encoding='utf-8').read().strip().split('\n')
+    return [line for line in lines]
+
+def load_data(directory):
+    category_lines = {}
+    all_categories = []
     
-    def find_files(path):
-        return glob.glob(path)
-    
-    def read_lines(filename):
-        lines = io.open(filename, encoding='utf-8').read().strip().split('\n')
-        return [line for line in lines]
-    
-    for filename in find_files('Data/train/*.csv'):
+    for filename in find_files(directory):
         category = os.path.splitext(os.path.basename(filename))[0]
-        all_categories_train.append(category)
+        all_categories.append(category)
         
         lines = read_lines(filename)
-        category_lines_train[category] = lines
+        category_lines[category] = lines
         
-    return category_lines_train, all_categories_train
+    return category_lines, all_categories
+
+def load_data_train():
+    return load_data(dataTrain_filepath)
 
 def load_data_test():
-    category_lines_test = {}
-    all_categories_test = []
-    
-    def find_files(path):
-        return glob.glob(path)
-    
-    def read_lines(filename):
-        lines = io.open(filename, encoding='utf-8').read().strip().split('\n')
-        return [line for line in lines]
-    
-    for filename in find_files('Data/test/*.csv'):
-        category = os.path.splitext(os.path.basename(filename))[0]
-        all_categories_test.append(category)
-        
-        lines = read_lines(filename)
-        category_lines_test[category] = lines
-        
-    return category_lines_test, all_categories_test
-
-def letter_to_tensor(word):
-    letter_tensor = torch.zeros((1, 16))
-    matrix_index = 0
-    for character in word:
-        character_vector = character_embeddings[character]
-        for dimension_value in character_vector:
-            letter_tensor[0][matrix_index] = float(dimension_value)  #
-            matrix_index += 1
-    return letter_tensor
+    return load_data(dataTest_filepath)
 
 def line_to_tensor(line):
     line_tensor = torch.zeros(len(line), 1, 16)
