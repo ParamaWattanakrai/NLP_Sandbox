@@ -68,6 +68,8 @@ num_epochs = 10000
 correct_predictions = 0
 total_predictions = 0
 
+# ----------------------------------------- Training -----------------------------------------#
+
 print("Start Training")
 start_time = time.time()
 
@@ -100,10 +102,13 @@ print(f"Training Accuracy: {accuracy:.2%}\n")
 # rnn.load_state_dict(torch.load('trained_rnn_model.pth'))
 # rnn.eval()  
 
+# ----------------------------------------- Testing -----------------------------------------#
+
 start_time = time.time()
 
 correct_predictions_test = 0
 total_predictions_test = 0
+
 
 print("Testing...")
 for category in all_categories_test:
