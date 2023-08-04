@@ -10,6 +10,7 @@ key_embedding = ""
 C_PATH = os.path.dirname(__file__)
 embedding_filepath = os.path.join(C_PATH, 'thai_character_embedding.csv')
 dataset_filepath = os.path.join(C_PATH, 'data/livedead.csv')
+output_filepath = os.path.join(C_PATH, 'embedded_dataset.csv')
 
 with open(embedding_filepath, 'r', encoding='utf-8') as f:
     unstructured_character_embeddings = csv.reader(f)
@@ -22,11 +23,16 @@ with open(dataset_filepath, 'r', encoding='utf-8') as f:
         dataset_dict[row[0]] = row[1:]
 
 for key in dataset_dict:
-    embedded_sample = np.array(dataset_dict[key], dtype=float)
+    embedded_sample = dataset_dict[key]
     for char in key:
         char_embedding = character_embeddings[char]
-        embedded_sample = np.concatenate((embedded_sample, char_embedding))
-    embedded_sample = embedded_sample.reshape(-1)
+        embedded_sample = np.concatenate((embedded_sample,char_embedding))
     print(embedded_sample)
     print("sddsdssd")
-    embedded_dataset.append(embedded_sample)
+    embedded_dataset.append(embedded_sample.tolist())
+
+print(embedded_dataset)
+
+with open(output_filepath, 'w', newline='', encoding='utf-8') as f:
+    writer = csv.writer(f)
+    writer.writerows(embedded_dataset)
