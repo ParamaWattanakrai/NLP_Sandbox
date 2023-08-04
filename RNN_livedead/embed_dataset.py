@@ -22,10 +22,11 @@ with open(dataset_filepath, 'r', encoding='utf-8') as f:
         dataset_dict[row[0]] = row[1:]
 
 for key in dataset_dict:
-    embedded_sample = dataset_dict[key]
+    embedded_sample = np.array(dataset_dict[key], dtype=float)
     for char in key:
         char_embedding = character_embeddings[char]
-        embedded_sample.append(char_embedding)
+        embedded_sample = np.concatenate((embedded_sample, char_embedding))
+    embedded_sample = embedded_sample.reshape(-1)
     print(embedded_sample)
     print("sddsdssd")
     embedded_dataset.append(embedded_sample)
