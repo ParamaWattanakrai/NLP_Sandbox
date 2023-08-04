@@ -1,14 +1,17 @@
-import random
+import csv
 
-# Sample dictionary
-my_dict = {'a': 1, 'b': 2, 'c': 3, 'd': 4, 'e': 5}
+def list_to_csv(data_list, filename):
+    with open(filename, 'w', newline='') as csvfile:
+        csv_writer = csv.writer(csvfile)
+        csv_writer.writerows(data_list)
 
-# Get the keys of the dictionary as a list
-keys_list = list(my_dict.keys())
+# Example list
+my_list = [
+    ["Name", "Age", "City"],
+    ["John", 30, "New York"],
+    ["Alice", 25, "San Francisco"],
+    ["Bob", 40, "Los Angeles"]
+]
 
-# Shuffle the keys list in place
-random.shuffle(keys_list)
-
-# Access the elements of the dictionary in the shuffled order
-for key in keys_list:
-    print(key, my_dict[key])
+# Calling the function to convert and save the list to a CSV file
+list_to_csv(my_list, "output.csv")

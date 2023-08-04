@@ -4,7 +4,8 @@ import numpy as np
 
 character_embeddings = {}
 dataset_dict = {}
-embedded_dataset_dict = {}
+embedded_dataset = []
+key_embedding = ""
 
 C_PATH = os.path.dirname(__file__)
 embedding_filepath = os.path.join(C_PATH, 'thai_character_embedding.csv')
@@ -21,10 +22,10 @@ with open(dataset_filepath, 'r', encoding='utf-8') as f:
         dataset_dict[row[0]] = row[1:]
 
 for key in dataset_dict:
-    key_embedding = []    
+    embedded_sample = dataset_dict[key]
     for char in key:
         char_embedding = character_embeddings[char]
-        key_embedding.append(char_embedding)
-    key_embedding
-
-print(char_embedding)
+        embedded_sample.append(char_embedding)
+    print(embedded_sample)
+    print("sddsdssd")
+    embedded_dataset.append(embedded_sample)
