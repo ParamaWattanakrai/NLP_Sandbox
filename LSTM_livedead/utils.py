@@ -29,7 +29,7 @@ class LivedeadDataset(Dataset):
     def __len__(self):
         return self.n_samples
 
-def Dataload(dataset=LivedeadDataset(), batch_size=10, train_ratio=0.7):
+def Dataload(dataset=LivedeadDataset(), batch_size=1, train_ratio=0.7):
     train_size = int(train_ratio * len(dataset))
     test_size = len(dataset) - train_size
 
@@ -40,18 +40,32 @@ def Dataload(dataset=LivedeadDataset(), batch_size=10, train_ratio=0.7):
 
     return train_loader, test_loader
 
-train_data, test_data = Dataload()
+def Embedding(Wordlist):
+    embedding = []
+    for word in Wordlist:
+        Word_tensor = torch.zeros(len(word), 16)
+        for i, character in enumerate(word):
+            character_vector = character_embeddings.get(character)
+            if character_vector is not None:
+                for j, dimension_value in enumerate(character_vector):
+                    Word_tensor[i][j] = float(dimension_value)
+        embedding.append(Word_tensor)
+    return embedding
 
-dataiter = iter(train_data)
-data = next(dataiter)
-features_train, labels_train = data
+def Getdata():
+    train_data, test_data = Dataload()
 
-dataiter = iter(test_data)
-data = next(dataiter)
-features_test, labels_test = data
+    dataiter = iter(train_data)
+    data = next(dataiter)
+    features_train, (labels_train) = data
 
-print(f'{features_train}\n')
-print(f'{labels_train}\n')
+    dataiter = iter(test_data)
+    data = next(dataiter)
+    features_test, (labels_test) = data
 
-print(f'{features_test}\n')
-print(f'{labels_test}\n')
+    return features_train, labels_train, features_test, labels_test
+
+if __name__ == '__main__':    
+    features_train, labels_train, features_test, labels_test = Getdata()
+    print(features_test)
+    print(labels_test)
