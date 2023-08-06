@@ -3,6 +3,7 @@ import csv
 import numpy as np
 import torch
 from torch.utils.data import Dataset, DataLoader, random_split
+import math
 
 character_embeddings = {}
 
@@ -16,7 +17,7 @@ with open(embedding_filepath, 'r', encoding='utf-8') as f:
 
 class LivedeadDataset(Dataset):
     def __init__(self):
-        keyvalue = np.loadtxt('LSTM_livedead/data/livedead.csv', delimiter=",", dtype=str, skiprows=1, encoding='utf-8')
+        keyvalue = np.loadtxt('LSTM_livedead/data/dataset.csv', delimiter=",", dtype=str, skiprows=1, encoding='utf-8')
         self.key = torch.from_numpy(keyvalue[:, 1:].astype(np.float32))
         self.label = keyvalue[:, [0]].tolist()
         self.n_samples = keyvalue.shape[0]
@@ -37,6 +38,7 @@ def Dataload(dataset=LivedeadDataset(), batch_size=1, train_ratio=0.7):
 
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    return train_loader, test_loader
 
     return train_loader, test_loader
 
@@ -67,5 +69,9 @@ def Getdata():
 
 if __name__ == '__main__':    
     features_train, labels_train, features_test, labels_test = Getdata()
+    
     print(features_test)
     print(labels_test)
+
+    print(features_train)
+    print(labels_train)
