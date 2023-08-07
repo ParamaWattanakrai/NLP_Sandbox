@@ -22,13 +22,10 @@ with open(dataset_filepath, 'r', encoding='utf-8') as f:
         if idx >= 1:
             dataset_dict[row[0]] = row[1:]
 
-def Loaddata(train_proportion=0.7):
+def Loaddata(train_proportion=0.8):
     total_samples = len(dataset_dict)
-
     num_samples = int(train_proportion * total_samples)
-
     random_keys = list(dataset_dict.keys())
-
     random.shuffle(random_keys)
 
     train_data = {key: dataset_dict[key] for key in random_keys[:num_samples]}

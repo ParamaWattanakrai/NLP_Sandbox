@@ -3,19 +3,9 @@ import time
 import torch.nn as nn
 from utils import Loaddata, Embedding, Random_training, Category_from_output
 
-category_lines_train, all_categories_train, category_lines_test, all_categories_test  = Loaddata()
-
-# hyperparameter
-n_input = 16
-n_hidden = 265 
-n_categories = len(all_categories_train)
-batch_size = 1
-learning_rate = 0.005
-num_epochs = 10000
-
-class RNN(nn.Module):
+class RNNModel(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
-        super(RNN, self).__init__()
+        super(RNNModel, self).__init__()
         self.hidden_size = hidden_size
         self.relu = nn.ReLU()
 
@@ -35,11 +25,11 @@ class RNN(nn.Module):
         return torch.zeros(batch_size, self.hidden_size)
 
 def train(line_tensor, category_tensor):
-    hidden = rnn.init_hidden(batch_size)
-    rnn.zero_grad()
+    hidden = model.init_hidden(batch_size)
+    model.zero_grad()
 
     for i in range(line_tensor.size()[0]):
-        output, hidden = rnn(line_tensor[i], hidden)
+        output, hidden = model(line_tensor[i], hidden)
 
     loss = criterion(output, category_tensor)
 
@@ -51,21 +41,31 @@ def train(line_tensor, category_tensor):
 def predict(input_line):
     with torch.no_grad():
         line_tensor = Embedding(input_line)
-        hidden = rnn.init_hidden(batch_size)
+        hidden = model.init_hidden(batch_size)
 
         for i in range(line_tensor.size()[0]):
-            output, hidden = rnn(line_tensor[i], hidden)
+            output, hidden = model(line_tensor[i], hidden)
 
         guess = Category_from_output(output, all_categories_train)
         print(f"Prediction: {guess}\n")
 
-rnn = RNN(n_input, n_hidden, n_categories)
+category_lines_train, all_categories_train, category_lines_test, all_categories_test  = Loaddata()
+
+# hyperparameter
+n_input = 16
+n_hidden = 128
+n_categories = len(all_categories_train)
+batch_size = 1
+learning_rate = 0.005
+num_epochs = 30000
+
+model = RNNModel(n_input, n_hidden, n_categories)
 
 criterion = nn.NLLLoss()
-optimizer = torch.optim.Adam(rnn.parameters(), lr=learning_rate)
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 
 current_loss = 0
-print_steps = 100
+print_steps = 1000
 correct_predictions = 0
 total_predictions = 0
 
@@ -120,10 +120,10 @@ for category in all_categories_test:
         line_tensor = Embedding(line)
 
         with torch.no_grad():
-            hidden = rnn.init_hidden(batch_size)
+            hidden = model.init_hidden(batch_size)
 
             for i in range(line_tensor.size()[0]):
-                output, hidden = rnn(line_tensor[i], hidden)
+                output, hidden = model(line_tensor[i], hidden)
 
             guess = Category_from_output(output, all_categories_train)
 
