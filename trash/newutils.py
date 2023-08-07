@@ -10,8 +10,8 @@ character_embeddings = {}
 dataset_dict = {}
 
 C_PATH = os.path.dirname(__file__)
-embedding_filepath = os.path.join(C_PATH, 'thai_character_embedding.csv')
-dataset_filepath = os.path.join(C_PATH, 'data/livedead.csv')
+embedding_filepath = os.path.join(C_PATH, 'data/thai_character_embedding.csv')
+dataset_filepath = os.path.join(C_PATH, 'data/dataset.csv')
 
 with open(embedding_filepath, 'r', encoding='utf-8') as f:
     unstructured_character_embeddings = csv.reader(f)

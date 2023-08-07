@@ -22,7 +22,7 @@ with open(dataset_filepath, 'r', encoding='utf-8') as f:
         if idx >= 1:
             dataset_dict[row[0]] = row[1:]
 
-def loaddata(train_proportion=0.7):
+def Loaddata(train_proportion=0.7):
     total_samples = len(dataset_dict)
 
     num_samples = int(train_proportion * total_samples)
@@ -49,7 +49,7 @@ def loaddata(train_proportion=0.7):
 
     return category_lines_train, all_categories_train, category_lines_test, all_categories_test
 
-def embedding(line):
+def Embedding(line):
     embedding = torch.zeros(len(line), 1, 16)
     for i, character in enumerate(line):
         character_vector = character_embeddings.get(character)
@@ -58,13 +58,13 @@ def embedding(line):
                 embedding[i][0][j] = float(dimension_value)
     return embedding
 
-def random_training(category_lines, all_categories):
+def Random_training(category_lines, all_categories):
     category = random.choice(all_categories)
     line = random.choice(category_lines[category])
     category_tensor = torch.tensor([all_categories.index(category)], dtype=torch.long)
-    line_tensor = embedding(line)
+    line_tensor = Embedding(line)
     return category, line, category_tensor, line_tensor
 
-def category_from_output(output, all_categories):
+def Category_from_output(output, all_categories):
     category_idx = torch.argmax(output).item()
     return all_categories[category_idx]

@@ -8,8 +8,8 @@ embedded_dataset = []
 key_embedding = ""
 
 C_PATH = os.path.dirname(__file__)
-embedding_filepath = os.path.join(C_PATH, 'thai_character_embedding.csv')
-dataset_filepath = os.path.join(C_PATH, 'data/livedead.csv')
+embedding_filepath = os.path.join(C_PATH, 'data/thai_character_embedding.csv')
+dataset_filepath = os.path.join(C_PATH, 'data/dataset.csv')
 output_filepath = os.path.join(C_PATH, 'embedded_dataset.csv')
 
 with open(embedding_filepath, 'r', encoding='utf-8') as f:
