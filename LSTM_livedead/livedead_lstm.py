@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 class LSTMModel(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size, num_layers=1):
+    def __init__(self, input_size, hidden_size, num_layers, output_size):
         super(LSTMModel, self).__init__()
         self.hidden_size = hidden_size
         self.num_layers = num_layers
@@ -16,10 +16,10 @@ class LSTMModel(nn.Module):
 
 # Hyperparameters
 input_size = 5
-hidden_size = 10
-num_layers = 2
-output_size = 3
-learning_rate = 0.001
+hidden_size = 128
+num_layers = 10
+output_size = 2
+learning_rate = 0.005
 num_epochs = 100
 
 model = LSTMModel(input_size, hidden_size, num_layers, output_size)
