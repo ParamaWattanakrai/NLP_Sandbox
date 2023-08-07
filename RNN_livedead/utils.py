@@ -1,68 +1,70 @@
-import io
 import os
-import glob
 import csv
 import torch
 import random
 
 character_embeddings = {}
+dataset_dict = {}
 
 C_PATH = os.path.dirname(__file__)
-embedding_filepath = os.path.join(C_PATH, 'thai_character_embedding.csv')
-dataTrain_filepath = os.path.join(C_PATH, 'data/train/*.csv')
-dataTest_filepath = os.path.join(C_PATH, 'data/test/*.csv')
+embedding_filepath = os.path.join(C_PATH, 'data/thai_character_embedding.csv')
+dataset_filepath = os.path.join(C_PATH, 'data/dataset.csv')
 
 with open(embedding_filepath, 'r', encoding='utf-8') as f:
     unstructured_character_embeddings = csv.reader(f)
-    for row in unstructured_character_embeddings:
-        character_embeddings[row[0]] = row[1:]
+    for idx, row in enumerate(unstructured_character_embeddings):
+        if idx >= 1:
+            character_embeddings[row[0]] = row[1:]
 
-def find_files(path):
-    return glob.glob(path)
+with open(dataset_filepath, 'r', encoding='utf-8') as f:
+    unstructured_dataset = csv.reader(f)
+    for idx, row in enumerate(unstructured_dataset):
+        if idx >= 1:
+            dataset_dict[row[0]] = row[1:]
 
-def read_lines(filename):
-    lines = io.open(filename, encoding='utf-8').read().strip().split('\n')
-    return [line for line in lines]
+def loaddata(train_proportion=0.7):
+    total_samples = len(dataset_dict)
 
-def load_data(directory):
-    category_lines = {}
-    all_categories = []
+    num_samples = int(train_proportion * total_samples)
+
+    random_keys = list(dataset_dict.keys())
+
+    random.shuffle(random_keys)
+
+    train_data = {key: dataset_dict[key] for key in random_keys[:num_samples]}
+    test_data = {key: dataset_dict[key] for key in random_keys[num_samples:]}
     
-    for filename in find_files(directory):
-        category = os.path.splitext(os.path.basename(filename))[0]
-        all_categories.append(category)
-        
-        lines = read_lines(filename)
-        category_lines[category] = lines
-        
-    return category_lines, all_categories
+    category_lines_train = {value[0]: [] for values in train_data.values() for value in values}
+    for key, values in train_data.items():
+        for value in values:
+            category_lines_train[value[0]].append(key)
 
-def load_data_train():
-    return load_data(dataTrain_filepath)
+    category_lines_test = {value[0]: [] for values in test_data.values() for value in values}
+    for key, values in test_data.items():
+        for value in values:
+            category_lines_test[value[0]].append(key)
 
-def load_data_test():
-    return load_data(dataTest_filepath)
+    all_categories_train = list(category_lines_train.keys())
+    all_categories_test = list(category_lines_test.keys())
 
-def line_to_tensor(line):
-    line_tensor = torch.zeros(len(line), 1, 16)
+    return category_lines_train, all_categories_train, category_lines_test, all_categories_test
+
+def embedding(line):
+    embedding = torch.zeros(len(line), 1, 16)
     for i, character in enumerate(line):
         character_vector = character_embeddings.get(character)
         if character_vector is not None:
             for j, dimension_value in enumerate(character_vector):
-                line_tensor[i][0][j] = float(dimension_value)
-    return line_tensor
+                embedding[i][0][j] = float(dimension_value)
+    return embedding
 
-def random_training_example(category_lines, all_categories):
+def random_training(category_lines, all_categories):
     category = random.choice(all_categories)
     line = random.choice(category_lines[category])
     category_tensor = torch.tensor([all_categories.index(category)], dtype=torch.long)
-    line_tensor = line_to_tensor(line)
+    line_tensor = embedding(line)
     return category, line, category_tensor, line_tensor
 
 def category_from_output(output, all_categories):
     category_idx = torch.argmax(output).item()
     return all_categories[category_idx]
-
-if __name__ == '__main__':    
-    category_lines_test, all_categories_test = load_data_test()
-    print(line_to_tensor('เป็น').size())

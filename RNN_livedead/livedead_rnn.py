@@ -1,7 +1,17 @@
 import torch
 import time
 import torch.nn as nn
-from utils import load_data_train, load_data_test, line_to_tensor, random_training_example, category_from_output
+from utils import loaddata, embedding, random_training, category_from_output
+
+category_lines_train, all_categories_train, category_lines_test, all_categories_test  = loaddata()
+
+# hyperparameter
+n_input = 16
+n_hidden = 128
+n_categories = len(all_categories_train)
+batch_size = 1
+learning_rate = 0.005
+num_epochs = 10000
 
 class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
@@ -21,11 +31,11 @@ class RNN(nn.Module):
         output = self.softmax(self.output_layer(hidden2))
         return output, hidden2 
     
-    def init_hidden(self,batch_size=1):
+    def init_hidden(self,batch_size):
         return torch.zeros(batch_size, self.hidden_size)
 
 def train(line_tensor, category_tensor):
-    hidden = rnn.init_hidden()
+    hidden = rnn.init_hidden(batch_size)
     rnn.zero_grad()
 
     for i in range(line_tensor.size()[0]):
@@ -40,8 +50,8 @@ def train(line_tensor, category_tensor):
 
 def predict(input_line):
     with torch.no_grad():
-        line_tensor = line_to_tensor(input_line)
-        hidden = rnn.init_hidden()
+        line_tensor = embedding(input_line)
+        hidden = rnn.init_hidden(batch_size)
 
         for i in range(line_tensor.size()[0]):
             output, hidden = rnn(line_tensor[i], hidden)
@@ -49,22 +59,13 @@ def predict(input_line):
         guess = category_from_output(output, all_categories_train)
         print(f"Prediction: {guess}\n")
 
-category_lines_train, all_categories_train = load_data_train()
-category_lines_test, all_categories_test = load_data_test()
-
-n_categories = len(all_categories_train)
-n_hidden = 128
-
-rnn = RNN(16, n_hidden, n_categories)
+rnn = RNN(n_input, n_hidden, n_categories)
 
 criterion = nn.NLLLoss()
-learning_rate = 0.005
-optimizer = torch.optim.SGD(rnn.parameters(), lr=learning_rate)
+optimizer = torch.optim.Adam(rnn.parameters(), lr=learning_rate)
+
 current_loss = 0
-
-print_steps = 500
-num_epochs = 10000 
-
+print_steps = 10
 correct_predictions = 0
 total_predictions = 0
 
@@ -74,7 +75,7 @@ print("Start Training")
 start_time = time.time()
 
 for epoch in range(num_epochs):
-    category, line, category_tensor, line_tensor = random_training_example(category_lines_train, all_categories_train)
+    category, line, category_tensor, line_tensor = random_training(category_lines_train, all_categories_train)
     
     output, loss = train(line_tensor, category_tensor)
     current_loss += loss
@@ -88,7 +89,7 @@ for epoch in range(num_epochs):
 
     if (epoch + 1) % print_steps == 0:
         accuracy = correct_predictions / total_predictions
-        print(f"{(epoch + 1) / num_epochs * 100:.2f}% Loss: {loss:.4f} Word: {line} / Guess: {guess} --> {correct} Accuracy: {accuracy:.2%}")
+        print(f"Epoch: {epoch+1} --> {(epoch + 1) / num_epochs * 100:.2f} % Loss: {loss:.4f} Word: {line} / Guess: {guess} --> {correct} Accuracy: {accuracy:.2%}")
 
 end_time = time.time()
 training_time = end_time - start_time
@@ -109,15 +110,17 @@ start_time = time.time()
 correct_predictions_test = 0
 total_predictions_test = 0
 
-
 print("Testing...")
+laps = 0
+
 for category in all_categories_test:
     for line in category_lines_test[category]:
+        laps += 1
         category_tensor = torch.tensor([all_categories_test.index(category)], dtype=torch.long)
-        line_tensor = line_to_tensor(line)
+        line_tensor = embedding(line)
 
         with torch.no_grad():
-            hidden = rnn.init_hidden()
+            hidden = rnn.init_hidden(batch_size)
 
             for i in range(line_tensor.size()[0]):
                 output, hidden = rnn(line_tensor[i], hidden)
@@ -129,7 +132,7 @@ for category in all_categories_test:
             correct_predictions_test += 1
 
         correct = "CORRECT" if guess == category else f"WRONG ({category})"
-        print(f"Input: {line} / Predicted: {guess} --> {correct}")
+        print(f"Lap: {laps} Input: {line} / Predicted: {guess} --> {correct}")
 
 end_time = time.time()
 training_time = end_time - start_time
