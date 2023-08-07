@@ -2,13 +2,12 @@ import torch
 import time
 import torch.nn as nn
 from utils import Loaddata, Embedding, Random_training, Category_from_output
-from color_output import print_colored
 
 category_lines_train, all_categories_train, category_lines_test, all_categories_test  = Loaddata()
 
 # hyperparameter
 n_input = 16
-n_hidden = 128
+n_hidden = 265 
 n_categories = len(all_categories_train)
 batch_size = 1
 learning_rate = 0.005
@@ -72,7 +71,7 @@ total_predictions = 0
 
 # ----------------------------------------- Training -----------------------------------------#
 
-print_colored("Start Training","yellow")
+print("Start Training")
 start_time = time.time()
 
 for epoch in range(num_epochs):
@@ -90,15 +89,14 @@ for epoch in range(num_epochs):
 
     if (epoch + 1) % print_steps == 0:
         accuracy = correct_predictions / total_predictions
-        color = "green" if guess == category else "red"
-        print_colored(f"Epoch: {epoch+1} --> {(epoch + 1) / num_epochs * 100:.2f} % Loss: {loss:.4f} Word: {line} / Guess: {guess} --> {correct} Accuracy: {accuracy:.2%}",color)
+        print(f"Epoch: {epoch+1} --> {(epoch + 1) / num_epochs * 100:.2f} % Loss: {loss:.4f} Word: {line} / Guess: {guess} --> {correct} Accuracy: {accuracy:.2%}")
 
 end_time = time.time()
 training_time = end_time - start_time
 accuracy = correct_predictions / total_predictions
 
-print_colored(f"Training time: {training_time:.2f} seconds","light_orange")
-print_colored(f"Training Accuracy: {accuracy:.2%}\n","light_orange")
+print(f"Training time: {training_time:.2f} seconds")
+print(f"Training Accuracy: {accuracy:.2%}\n")
 
 # torch.save(rnn.state_dict(), 'trained_rnn_model.pth')
 # rnn = RNN(16, n_hidden, n_categories)
@@ -112,7 +110,7 @@ start_time = time.time()
 correct_predictions_test = 0
 total_predictions_test = 0
 
-print_colored("Testing...", "yellow")
+print("Testing...")
 laps = 0
 
 for category in all_categories_test:
@@ -135,15 +133,14 @@ for category in all_categories_test:
 
         correct = "CORRECT" if guess == category else f"WRONG ({category})"
 
-        color = "green" if guess == category else "red"
-        print_colored(f"Lap: {laps} Input: {line} / Predicted: {guess} --> {correct}", color)
+        print(f"Lap: {laps} Input: {line} / Predicted: {guess} --> {correct}")
 
 end_time = time.time()
 training_time = end_time - start_time
 test_accuracy = correct_predictions_test / total_predictions_test
 
-print_colored(f"Testing time: {training_time:.2f} seconds","light_orange")
-print_colored(f"Test Accuracy: {test_accuracy:.2%}","light_orange")
+print(f"Testing time: {training_time:.2f} seconds")
+print(f"Test Accuracy: {test_accuracy:.2%}")
 
 print("\nสรุปผลบ")
 print(f"Training Accuracy: {accuracy:.2%}")
@@ -159,4 +156,4 @@ while True:
 
     predict(sentence)
 
-print_colored("Exiting.","red")
+print("Exiting.")
