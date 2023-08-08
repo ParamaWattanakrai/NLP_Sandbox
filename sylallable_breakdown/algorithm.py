@@ -16,8 +16,6 @@ class Character:
             chars_before.append(char.char)
         for char in self.after:
             chars_after.append(char.char)
-        print('hello')
-        print(self.char)
         return f'Character: {self.char}\nPosition: {self.position}\nIn Cluster: {self.cluster_role}\nRole: {self.char_role}\nChracters Before: {chars_before}\nCharacters After: {chars_before}'
     def getBefore(self, distance):
         distance += 1
@@ -32,17 +30,19 @@ class Character:
 class Syllable:
     def __init__(self, string):
         self.chars = []
+        chars = []
         for index, char in enumerate(string):
-            thischar = Character(char, index, 'unknown', 'unknown', self.chars, [])
-            if self.chars is None:
-                self.chars = [thischar]
-                continue
-            for char in self.chars:
-                if char.after is None:
-                    char.after = []
-                    continue
-                char.after = char.after.append(thischar)
+            thischar = Character(char, index, 'unknown', 'unknown', [], [])
             self.chars.append(thischar)
+            chars.append(thischar)
+        for index, char in enumerate(self.chars):
+            print(index, char.char)
+            after = chars[index+1:]
+            char.after = after
+        for index, char in enumerate(self.chars):
+            print(index, char.char)
+            before = chars[:index]
+            char.before = before
     def getInformation(self):
         information = f''
         return information
@@ -59,4 +59,5 @@ def find_leading_consonant(syllable):
         break
 
 syl = Syllable('เรียน')
-print(syl.chars[0].getInformation())
+for char in syl.chars:
+    print(char.getInformation())
