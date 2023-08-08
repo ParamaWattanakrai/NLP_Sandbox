@@ -34,19 +34,9 @@ class Syllable:
         for index, char in enumerate(string):
             thischar = Character(char, index, 'unknown', 'unknown', [], [])
             self.chars.append(thischar)
-        print(self.chars[:2])
-        print(self.chars[2:])
         for index, char in enumerate(self.chars):
-            print(index, char.char)
-            print(self.chars[:index])
             char.before = self.chars[:index]
-            print(self.chars[:index])
-        for index, char in enumerate(self.chars):
-            print(index, char.char)
-            print(self.chars[index+1:])
             char.after = self.chars[index+1:]
-            print(self.chars[index+1:])
-            print(char.after)
     def getInformation(self):
         information = f''
         return information
