@@ -80,23 +80,52 @@ def extract_roles(syllable):
 
     if syllable.chars[0].char in INITIAL_VOWELS:
         initial_vowel = syllable.chars[0]
-        current_index += 0
+        current_index += 1
+        print('Found initial vowel', current_index)
     
-    if syllable.chars[current_index].char in LEADING_CONSONANTS:
-        #check if leading modifies initial
-        current_index += 2
-    elif syllable.chars[current_index].char in CONSONANTS and syllable.chars[current_index].getAfter(0).char in BLENDS:
+    if syllable.chars[current_index].char in LEADING_CONSONANTS and syllable.chars[current_index].getAfter(0) in UNPAIRED_LOW_CONSONANTS:
+        #if not actually lead (Next one is vowel)
+        if initial_vowel and syllable.chars[current_index].getAfter(0) in BLENDS:
+            initial_consonants = [syllable.chars[current_index]]
+            current_index += 1
         initial_consonants = [syllable.chars[current_index], syllable.chars[current_index].getAfter(0)]
         current_index += 2
+    elif syllable.chars[current_index].char in CONSONANTS and syllable.chars[current_index].getAfter(0).char in BLENDS:
+        #has to check if next one is vowel
+        initial_consonants = [syllable.chars[current_index], syllable.chars[current_index].getAfter(0)]
+        current_index += 2
+    elif syllable.chars[current_index].char is 'ร' and syllable.chars[current_index].getAfter(0).char is 'ร':
+        initial_consonants = [syllable.chars[current_index], syllable.chars[current_index].getAfter(0)]
+        current_index += 2
+
     else:
         initial_consonants = [syllable.chars[current_index]]
         current_index += 1
 
     if syllable.chars[current_index].char in VOWELS:
-        current_index += 0
+        #if one vowel
+        #if followed by อ ย
+        current_index +=0
     
-    final_consonants = syllable.chars[current_index+1:]
-    
+    if syllable.chars[current_index].char:
+        current_index +=0
 
-syl = Syllable('อวย')
-print(syl.chars[1].getInformation())
+    final_consonants = syllable.chars[current_index+1:]
+
+def test(syllable):
+    current_index = 0
+    initial_vowel = ''
+    initial_consonants = []
+    final_vowels = []
+    final_consonants = []
+    print(syllable.chars[0].char)
+    print(syllable.chars[0].getAfter(1).char)
+    if syllable.chars[0].char == 'โ' and syllable.chars[0].getAfter(1).char == 'ย':
+        print("yse")
+        initial_vowel = [syllable.chars[0]]
+        final_vowels = [syllable.chars[0].getAfter(1)]
+    print(initial_vowel[0].getInformation)
+    print(final_vowels[0].getInformation())
+
+syl = SyllableCharacters('โดย')
+test(syl)
