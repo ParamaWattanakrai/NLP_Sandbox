@@ -3,14 +3,14 @@ from torch.utils.data import Dataset, DataLoader
 import numpy as np
 
 class Data():
-    def __init__(self, label, one_hot, ipa):
+    def __init__(self, label, one_hot, ipa, vector):
         self.label = label
         self.one_hot = one_hot
         self.ipa = ipa
+        self.vector = vector
     
     def getInformation(self):
-        return f'Label: {self.label}\nOne Hot: {self.one_hot}\nIPA: {self.ipa}'
-
+        return f'Label: {self.label}\nOne Hot: {self.one_hot}\nIPA: {self.ipa}\nVector: {self.vector}'
 
 class DataLoader(Dataset):
     def __init__(self):
@@ -19,8 +19,9 @@ class DataLoader(Dataset):
         self.one_hot = torch.from_numpy(character_embedded[:, 2:70].astype(np.float32))
         self.ipa = torch.from_numpy(character_embedded[:, 70:86].astype(np.float32))
         self.list_of_data = []
+        self.vector = None
         for index, char in enumerate(self.label):
-            self.list_of_data.append(Data(self.label[index], self.one_hot[index], self.ipa[index]))
+            self.list_of_data.append(Data(self.label[index], self.one_hot[index], self.ipa[index], self.vector))
     
     def searchData(self, label):
         target_label = label
