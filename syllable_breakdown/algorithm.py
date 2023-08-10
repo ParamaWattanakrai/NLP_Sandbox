@@ -124,30 +124,38 @@ def find_initial_consonants_cluster(syllable, current_index, ee_initial, ai_init
     w_vowel = False
 
     first_consonant = syllable.chars[current_index]
-    potential_second_consonant = first_consonant.getAfter(0)
 
     initial_consonants = [first_consonant]
     current_index += 1
 
-    if potential_second_consonant.char in CONSONANTS:
+    if first_consonant.getAfter(0):
+        potential_second_consonant = first_consonant.getAfter(0)
+        if potential_second_consonant.char in CONSONANTS:
 
-        if potential_second_consonant.char == 'อ':
-            return [current_index, initial_consonants, w_vowel]
-        
-        if potential_second_consonant.char == 'ย' and (ee_initial or ai_initial):
-            return [current_index, initial_consonants, w_vowel]
+            if potential_second_consonant.char == 'อ':
+                return [current_index, initial_consonants, w_vowel]
+            
+            if potential_second_consonant.char == 'ย' and (ee_initial or ai_initial):
+                return [current_index, initial_consonants, w_vowel]
 
-        if potential_second_consonant.char == 'ว':
-            for chars in syllable.chars:
-                if chars.char in VOWELS:
-                    initial_consonants.append(potential_second_consonant)
-                    current_index += 1
+            if potential_second_consonant.char == 'ว':
+                for chars in syllable.chars:
+                    if chars.char in VOWELS:
+                        initial_consonants.append(potential_second_consonant)
+                        current_index += 1
+                        return [current_index, initial_consonants, w_vowel]
+                w_vowel = True
+                return [current_index, initial_consonants, w_vowel]
+            
+            if potential_second_consonant.getAfter(0):
+                if potential_second_consonant.char == 'ร' and potential_second_consonant.getAfter(0).char == 'ร':
                     return [current_index, initial_consonants, w_vowel]
-            w_vowel = True
+                initial_consonants.append(potential_second_consonant)
+                current_index += 1
+            
+            initial_consonants.append(potential_second_consonant)
+            current_index += 1
             return [current_index, initial_consonants, w_vowel]
-        
-        initial_consonants.append(potential_second_consonant)
-        current_index += 1
 
         #Support implied oh pls
     return [current_index, initial_consonants, w_vowel]
@@ -155,6 +163,9 @@ def find_initial_consonants_cluster(syllable, current_index, ee_initial, ai_init
 def find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initial, ai_initial, w_vowel):
     final_vowels = []
     tone_marks = []
+
+    if len(syllable.chars) <= current_index:
+        return [current_index, final_vowels, tone_marks]
 
     def append_loop(first_index, final_index):
         final_index += 1
@@ -199,6 +210,12 @@ def find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initia
     after1_char = ''
     if current_index + 2 < len(syllable.chars):
         after1_char = syllable.chars[current_index].getAfter(1).char
+
+    if syllable.chars[current_index].char == 'ร' and after0_char == 'ร':
+        final_vowels.append(syllable.chars[current_index])
+        final_vowels.append(syllable.chars[current_index].getAfter(0))
+        current_index += 2
+        return [current_index, final_vowels, tone_marks]
 
     if (syllable.chars[current_index].char in TONE_MARKS and after0_char == 'ว') or \
         (syllable.chars[current_index].char == 'ั' and after0_char == 'ว') or \
@@ -273,7 +290,7 @@ def extract_clusters(syllable):
 
     return [initial_vowels_cluster, initial_consonants_cluster, tone_marks_cluster, final_vowels_cluster, final_consonants_cluster]
 
-syllable = Syllable('เหลือง')
+syllable = Syllable('ไก')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
 print(syllable.getInformation())
