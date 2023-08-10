@@ -265,7 +265,7 @@ def extract_clusters(syllable):
 
     return [initial_vowels_cluster, initial_consonants_cluster, tone_marks_cluster, final_vowels_cluster, final_consonants_cluster]
 
-syllable = Syllable('เคราะห์')
+syllable = Syllable('ไทย')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
 
