@@ -19,15 +19,14 @@ BLEND_LEADS = th_all.blend_initials
 
 INITIAL_VOWELS = th_all.initial_vowels
 
-class Character():
-    def __init__(self, char, position, syllable, before=[], after=[], cluster='unknown', char_role='unknown'):
+class Character:
+    def __init__(self, char, position, cluster_role, char_role, before, after):
         self.char = char
         self.position = position
-        self.syllable = syllable
+        self.cluster_role = cluster_role
+        self.char_role = char_role
         self.before = before
         self.after = after
-        self.cluster = cluster
-        self.role = char_role
     def getInformation(self):
         chars_before = []
         chars_after = []
@@ -35,80 +34,42 @@ class Character():
             chars_before.append(char.char)
         for char in self.after:
             chars_after.append(char.char)
-        return f'Character: {self.char}\nPosition: {self.position}\nIn Cluster: {self.cluster}\nRole: {self.role}\nChracters Before: {chars_before}\nCharacters After: {chars_after}'
+        return f'Character: {self.char}\nPosition: {self.position}\nIn Cluster: {self.cluster_role}\nRole: {self.char_role}\nChracters Before: {chars_before}\nCharacters After: {chars_after}'
     def getBefore(self, distance):
         distance += 1
         if len(self.before) < distance:
             return None
         return self.before[-distance]
     def getAfter(self, distance):
-        print(len(self.after) < distance)
         if len(self.after) < distance:
             return None
         return self.after[distance]
-    def selfCluster(self, cluster):
-        return self.syllable.assignCluster(self, cluster)
 
-class Syllable:
+class SyllableCharacters:
     def __init__(self, string):
-        self.string = string
         self.chars = []
-        
-        self.initial_vowels_cluster = []
-        self.initial_consonants_cluster = []
-        self.tone_marks_cluster = []
-        self.final_vowels_cluster = []
-        self.final_consonants_cluster = []
-
+        chars = []
         for index, char in enumerate(string):
-            thischar = Character(char, index, self)
+            thischar = Character(char, index, 'unknown', 'unknown', [], [])
             self.chars.append(thischar)
         for index, char in enumerate(self.chars):
             char.before = self.chars[:index]
             char.after = self.chars[index+1:]
     def getInformation(self):
-        initial_vowels = []
-        initial_consonants = []
-        tone_marks = []
-        final_vowels = []
-        final_consonants = []
-        for initial_vowel in self.initial_vowels_cluster:
-            initial_vowels.append(initial_vowel.char)
-        for initial_consonant in self.initial_consonants_cluster:
-            initial_consonants.append(initial_consonant.char)
-        for tone_mark in self.tone_marks_cluster:
-            tone_marks.append(tone_mark.char)
-        for final_vowel in self.final_vowels_cluster:
-            final_vowels.append(final_vowel.char)
-        for final_consonant in self.final_consonants_cluster:
-            final_consonants.append(final_consonant.char)
-        information = f'''\
-            Syllable String: {self.string}
-            Initial Vowels Cluster: {initial_vowels}
-            Initial Consonants Cluster: {initial_consonants}
-            Tone Marks Cluster: {tone_marks}
-            Final Vowels Cluster: {final_vowels}
-            Final Consonants Cluster: {final_consonants}
-            '''
+        information = f''
         return information
-    def assignCluster(self, char, cluster):
-        if cluster == 'initial_vowels_cluster':
-            char.cluster = 'initial_vowels_cluster'
-            self.initial_vowels_cluster.append(char)
-        elif cluster == 'initial_consonants_cluster':
-            char.cluster = 'initial_consonants_cluster'
-            self.initial_consonants_cluster.append(char)
-        elif cluster == 'tone_marks_cluster':
-            char.cluster = 'tone_marks_cluster'
-            self.tone_marks_cluster.append(char)
-        elif cluster == 'final_vowels_cluster':
-            char.cluster = 'final_vowels_cluster'
-            self.final_vowels_cluster.append(char)
-        elif cluster == 'final_consonants_cluster':
-            char.cluster = 'final_consonants_cluster'
-            self.final_consonants_cluster.append(char)
-        else:
-            return None
+
+class SyllableClusters:
+    def __init__(self, initial_vowel, initial_consonants, tone_mark, final_vowels, final_consonants):
+        self.initial_vowel_cluster = initial_vowel
+        self.initial_consonants_cluster = initial_consonants
+
+class Cluster:
+    def __init__(self, cluster_role, chars):
+        self.cluster_role = cluster_role
+        self.chars = chars
+    def findCharRole(self, target_char_role):
+        return next((char for char in self.chars if char.char_role == target_char_role), None)
 
 def find_initial_vowels_cluster(syllable):
     initial_vowels = []
@@ -254,25 +215,14 @@ def extract_clusters(syllable):
 
     final_vowels_and_tone_marks_clusters_info = find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initial, ai_initial, w_vowel)
     current_index = final_vowels_and_tone_marks_clusters_info[0]
-    final_vowels_cluster = final_vowels_and_tone_marks_clusters_info[1]
-    tone_marks_cluster = final_vowels_and_tone_marks_clusters_info[2]
+    final_vowels = final_vowels_and_tone_marks_clusters_info[1]
+    tone_marks = final_vowels_and_tone_marks_clusters_info[2]
 
     final_consonants_cluster = find_final_consonants_cluster(syllable, current_index)
 
-    for char in initial_vowels_cluster:
-        char.selfCluster('initial_vowels_cluster')
-    for char in initial_consonants_cluster:
-        char.selfCluster('initial_consonants_cluster')
-    for char in tone_marks_cluster:
-        char.selfCluster('tone_marks_cluster')
-    for char in final_vowels_cluster:
-        char.selfCluster('final_vowels_cluster')
-    for char in final_consonants_cluster:
-        char.selfCluster('final_consonants_cluster')
+    return [initial_vowels_cluster, initial_consonants_cluster, final_vowels, tone_marks, final_consonants_cluster]
 
-    return [initial_vowels_cluster, initial_consonants_cluster, tone_marks_cluster, final_vowels_cluster, final_consonants_cluster]
-
-syllable = Syllable('เลย')
-print(f'Syllable Length: {len(syllable.chars)}')
-extract_clusters(syllable)
-print(syllable.getInformation())
+syl = SyllableCharacters('เคราะห์')
+print(f'Syllable Length: {len(syl.chars)}')
+print(extract_clusters(syl))
+print(0, extract_clusters(syl)[4][1].char)
