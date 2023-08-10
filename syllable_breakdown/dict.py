@@ -67,6 +67,35 @@ y_final_sound = ['ย']
 w_final_sound = ['ว']
 ng_final_sound = ['ง']
 
+a_forms = ['ั', 'รร', 'ะ']
+aa_forms = ['า']
+ae_forms = ['แ็','แะ']
+aeae_forms = ['แ']
+o_forms = ['็อ','เาะ']
+oo_forms = ['อ']
+e_forms = ['เ็','เะ']
+ee_forms = ['เ']
+oe_forms = ['เอะ'] # เ-ิ
+oeoe_forms = ['เิ','เอ']
+oh_forms = ['โะ']
+ohoh_forms = ['โ']
+i_forms = ['ิ']
+ii_forms = ['ี']
+ue_forms = ['ึ']
+ueue_forms = ['ิ','ิอ']
+u_forms = ['ุ']
+uu_forms = ['ู']
+
+ia_forms = ['','','','','','','']
+iaia_forms = ['','','','','','','']
+uea_forms = ['','','','','','','']
+ueauea_forms = ['','','','','','','']
+ua_forms = ['','','','','','','']
+uaua_forms = ['','','','','','','']
+
+ai_forms = ['','','','','','','']
+aiai = ['','','','','','','']
+
 class ThaiCharDict:
     def __init__(self, consonants, vowels, tone_marks,
             low_consonants, unpaired_low_consonants, paired_low_consonants, high_consonants, mid_consonants,

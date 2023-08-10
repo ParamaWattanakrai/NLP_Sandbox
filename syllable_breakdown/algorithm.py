@@ -78,6 +78,7 @@ class Syllable:
         self.final_consonants = []
         self.silent_characters = []
 
+        self.initial_sound = ''
         self.final_sound = ''
 
         for index, char in enumerate(string):
@@ -93,16 +94,23 @@ class Syllable:
         final_vowels = []
         final_consonants = []
         initial_vowels_roles = []
-        for initial_vowel in self.initial_vowels_cluster:
-            initial_vowels.append([initial_vowel.char, initial_vowel.role])
-        for initial_consonant in self.initial_consonants_cluster:
-            initial_consonants.append([initial_consonant.char, initial_consonant.role])
-        for tone_mark in self.tone_marks_cluster:
-            tone_marks.append([tone_mark.char, tone_mark.role])
-        for final_vowel in self.final_vowels_cluster:
-            final_vowels.append([final_vowel.char, final_vowel.role])
-        for final_consonant in self.final_consonants_cluster:
-            final_consonants.append([final_consonant.char, final_consonant.role])
+
+        vowels = []
+
+        for char in self.initial_vowels_cluster:
+            initial_vowels.append([char.char, char.role])
+        for char in self.initial_consonants_cluster:
+            initial_consonants.append([char.char, char.role])
+        for char in self.tone_marks_cluster:
+            tone_marks.append([char.char, char.role])
+        for char in self.final_vowels_cluster:
+            final_vowels.append([char.char, char.role])
+        for char in self.final_consonants_cluster:
+            final_consonants.append([char.char, char.role])
+
+        for char in self.getVowel():
+            vowels.append(char.char)
+
         information = f'''\
             Syllable String: {self.string}
             Initial Vowels Cluster: {initial_vowels}
@@ -110,6 +118,18 @@ class Syllable:
             Tone Marks Cluster: {tone_marks}
             Final Vowels Cluster: {final_vowels}
             Final Consonants Cluster: {final_consonants}
+
+            Initial Sound:
+            Final Sound: {self.final_sound}
+            
+            Vowel Form: {vowels}
+            Vowel Default Form:
+            Vowel Duration:
+
+            Vowel Long Form:
+            Vowel Short Form:
+
+            Live/Dead:
             '''
         return information
     def assignCluster(self, char, cluster):
@@ -177,7 +197,6 @@ def find_initial_consonants_cluster(syllable, current_index, ee_initial, ai_init
     if first_consonant.getAfter(0):
         potential_second_consonant = first_consonant.getAfter(0)
         if potential_second_consonant.char in CONSONANTS:
-
             if potential_second_consonant.char == 'อ':
                 return [current_index, initial_consonants, w_vowel]
             
@@ -196,10 +215,12 @@ def find_initial_consonants_cluster(syllable, current_index, ee_initial, ai_init
             if potential_second_consonant.getAfter(0):
                 if potential_second_consonant.char == 'ร' and potential_second_consonant.getAfter(0).char == 'ร':
                     return [current_index, initial_consonants, w_vowel]
+                if potential_second_consonant.char not in BLENDING_CONSONANTS:
+                    return [current_index, initial_consonants, w_vowel]
                 initial_consonants.append(potential_second_consonant)
                 current_index += 1
                 return [current_index, initial_consonants, w_vowel]
-            
+
             initial_consonants.append(potential_second_consonant)
             current_index += 1
             return [current_index, initial_consonants, w_vowel]
@@ -356,7 +377,7 @@ def extract_final_consonants_cluster(syllable):
     if not final_consonants_cluster:
         return
     
-    if final_consonants_cluster[-1].char == '์':
+    if len(final_consonants_cluster) == 2 and final_consonants_cluster[-1].char == '์':
         final_consonants_cluster[-1].selfRole('silent_character')
         final_consonants_cluster[-2].selfRole('silent_character')
         return
@@ -378,31 +399,42 @@ def extract_roles(syllable):
     extract_final_consonants_cluster(syllable)
     return
 
-def get_final_sound(syllable):
+def process_final_sound(syllable):
+    final_sound = '-'
     if not syllable.final_consonants:
-        return 'open'
+        if syllable.final_vowels_cluster:
+            if syllable.final_vowels_cluster[0] == 'ำ':
+                syllable.final_sound = 'ม'
+                return
+        syllable.final_sound = final_sound
+        return final_sound
     if syllable.final_consonants[0].char in K_FINAL_SOUND:
-        return 'k'
+        final_sound = 'ก'
     if syllable.final_consonants[0].char in P_FINAL_SOUND:
-        return 'p'
+        final_sound = 'บ'
     if syllable.final_consonants[0].char in T_FINAL_SOUND:
-        return 't'
+        final_sound = 'ด'
     if syllable.final_consonants[0].char in N_FINAL_SOUND:
-        return 'n'
+        final_sound = 'น'
     if syllable.final_consonants[0].char in M_FINAL_SOUND:
-        return 'm'
+        final_sound = 'ม'
     if syllable.final_consonants[0].char in Y_FINAL_SOUND:
-        return 'y'
+        final_sound = 'ย'
     if syllable.final_consonants[0].char in W_FINAL_SOUND:
-        return 'w'
+        final_sound = 'ว'
     if syllable.final_consonants[0].char in NG_FINAL_SOUND:
-        return 'ng'
-    return 'open'
+        final_sound = 'ง'
+    syllable.final_sound = final_sound
+    return final_sound
 
-syllable = Syllable('มารถ')
+def process_vowel(syllable):
+
+    return
+
+syllable = Syllable('ควาย')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
 extract_roles(syllable)
+process_final_sound(syllable)
 print(syllable.getInformation())
-syllable.final_sound = get_final_sound(syllable)
 print(syllable.final_sound)
