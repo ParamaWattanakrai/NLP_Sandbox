@@ -14,7 +14,7 @@ MID_CONSONANTS = th_all.mid_consonants
 
 LEADING_CONSONANTS = th_all.leading_consonants
 
-BLENDS = th_all.blends
+BLENDING_CONSONANTS = th_all.blending_consonants
 BLEND_LEADS = th_all.blend_initials
 
 INITIAL_VOWELS = th_all.initial_vowels
@@ -261,7 +261,6 @@ def extract_clusters(syllable):
         char.selfCluster('final_vowels_cluster')
     for char in final_consonants_cluster:
         char.selfCluster('final_consonants_cluster')
-
 
     return [initial_vowels_cluster, initial_consonants_cluster, tone_marks_cluster, final_vowels_cluster, final_consonants_cluster]
 

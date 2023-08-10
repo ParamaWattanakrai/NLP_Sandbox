@@ -14,7 +14,7 @@ MID_CONSONANTS = th_all.mid_consonants
 
 LEADING_CONSONANTS = th_all.leading_consonants
 
-BLENDS = th_all.blends
+BLENDING_CONSONANTS = th_all.blending_consonants
 BLEND_LEADS = th_all.blend_initials
 
 INITIAL_VOWELS = th_all.initial_vowels
@@ -42,12 +42,13 @@ class Character():
             return None
         return self.before[-distance]
     def getAfter(self, distance):
-        print(len(self.after), distance)
         if len(self.after) <= distance:
             return None
         return self.after[distance]
     def selfCluster(self, cluster):
         return self.syllable.assignCluster(self, cluster)
+    def selfRole(self, role):
+        return self.syllable.assignRole(self, role)
 
 class Syllable:
     def __init__(self, string):
@@ -59,6 +60,14 @@ class Syllable:
         self.tone_marks_cluster = []
         self.final_vowels_cluster = []
         self.final_consonants_cluster = []
+
+        self.leading_consonants = []
+        self.initial_consonants = []
+        self.blending_consonants = []
+        self.vowels = []
+        self.tone_marks = []
+        self.final_consonants = []
+        self.silent_characters = []
 
         for index, char in enumerate(string):
             thischar = Character(char, index, self)
@@ -94,22 +103,48 @@ class Syllable:
         return information
     def assignCluster(self, char, cluster):
         if cluster == 'initial_vowels_cluster':
-            char.cluster = 'initial_vowels_cluster'
+            char.cluster = cluster
             self.initial_vowels_cluster.append(char)
         elif cluster == 'initial_consonants_cluster':
-            char.cluster = 'initial_consonants_cluster'
+            char.cluster = cluster
             self.initial_consonants_cluster.append(char)
         elif cluster == 'tone_marks_cluster':
-            char.cluster = 'tone_marks_cluster'
+            char.cluster = cluster
             self.tone_marks_cluster.append(char)
         elif cluster == 'final_vowels_cluster':
-            char.cluster = 'final_vowels_cluster'
+            char.cluster = cluster
             self.final_vowels_cluster.append(char)
         elif cluster == 'final_consonants_cluster':
-            char.cluster = 'final_consonants_cluster'
+            char.cluster = cluster
             self.final_consonants_cluster.append(char)
         else:
             return None
+    def assignRole(self, char, role):
+        if role == 'leading_consonant':
+            char.role = role
+            self.leading_consonants.append(char)
+        elif role == 'initial_consonant':
+            char.role = role
+            self.initial_consonants.append(char)    
+        elif role == 'blending_consonant':
+            char.role = role
+            self.blending_consonants.append(char)
+        elif role == 'vowel':
+            char.role = role
+            self.vowels.append(char)
+        elif role == 'tone_mark':
+            char.role = role
+            self.tone_marks.append(char)
+        elif role == 'final_consonant':
+            char.role = role
+            self.initial_consonants.append(char)
+        elif role == 'silent_character':
+            char.role = role
+            self.silent_characters.append(char)
+        else:
+            return None
+    def getVowel(self):
+        return self.initial_vowels_cluster + self.final_vowels_cluster
 
 def find_initial_vowels_cluster(syllable):
     initial_vowels = []
@@ -152,12 +187,12 @@ def find_initial_consonants_cluster(syllable, current_index, ee_initial, ai_init
                     return [current_index, initial_consonants, w_vowel]
                 initial_consonants.append(potential_second_consonant)
                 current_index += 1
+                return [current_index, initial_consonants, w_vowel]
             
             initial_consonants.append(potential_second_consonant)
             current_index += 1
             return [current_index, initial_consonants, w_vowel]
 
-        #Support implied oh pls
     return [current_index, initial_consonants, w_vowel]
 
 def find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initial, ai_initial, w_vowel):
@@ -288,9 +323,43 @@ def extract_clusters(syllable):
     for char in final_consonants_cluster:
         char.selfCluster('final_consonants_cluster')
 
-    return [initial_vowels_cluster, initial_consonants_cluster, tone_marks_cluster, final_vowels_cluster, final_consonants_cluster]
+def extract_initial_consonants_cluster(syllable):
+    initial_consonants_cluster = syllable.initial_consonants_cluster
 
-syllable = Syllable('ไก')
+    if len(initial_consonants_cluster) == 1:
+        initial_consonants_cluster[0].selfRole('initial_consonant')
+        return
+
+    if (initial_consonants_cluster[0].char == 'ห' or initial_consonants_cluster[0].char == 'อ') and \
+        initial_consonants_cluster[1].char in UNPAIRED_LOW_CONSONANTS:
+        initial_consonants_cluster[0].selfRole('leading_consonant')
+        initial_consonants_cluster[1].selfRole('initial_consonant')
+        return
+    
+    initial_consonants_cluster[0].selfRole('initial_consonant')
+    initial_consonants_cluster[1].selfRole('blending_consonant')
+
+def extract_final_consonants_cluster(syllable):
+    final_consonants_cluster = syllable.final_consonants_cluster
+
+    if not final_consonants_cluster:
+        return
+    
+    final_consonants_cluster[0].selfRole('final_consonant')
+    for char in final_consonants_cluster[1:]:
+        char.selfRole('silent_character')
+
+def extract_roles(syllable):
+    for char in syllable.initial_vowels_cluster + syllable.final_vowels_cluster:
+        char.selfRole('vowel')
+    for char in syllable.tone_marks_cluster:
+        char.selfRole('tone_mark')
+    extract_initial_consonants_cluster(syllable)
+    extract_final_consonants_cluster(syllable)
+    return
+
+syllable = Syllable('กร่อบ')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
+extract_roles(syllable)
 print(syllable.getInformation())

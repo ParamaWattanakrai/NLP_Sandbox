@@ -53,7 +53,7 @@ mid_consonants = ['ก','จ','ฎ','ฏ','ด','ต','บ','ป','อ']
 
 leading_consonants = ['ห','อ']
 
-blends = ['ย','ร','ล','ว']
+blending_consonants = ['ย','ร','ล','ว']
 blend_initials = []
 
 initial_vowels = ['แ', 'เ', 'โ', 'ไ', 'ใ']
@@ -62,7 +62,7 @@ class ThaiCharDict:
     def __init__(self, consonants, vowels, tone_marks,
             low_consonants, unpaired_low_consonants, paired_low_consonants, high_consonants, mid_consonants,
             leading_consonants,
-            blends, blend_initials,
+            blending_consonants, blend_initials,
             initial_vowels):
 
         self.consonants = consonants
@@ -77,7 +77,7 @@ class ThaiCharDict:
 
         self.leading_consonants = leading_consonants
 
-        self.blends = blends
+        self.blending_consonants = blending_consonants
         self.blend_initials = blend_initials
 
         self.initial_vowels = initial_vowels
@@ -85,5 +85,5 @@ class ThaiCharDict:
 th_all = ThaiCharDict(consonants, vowels, tone_marks,
             low_consonants, unpaired_low_consonants, paired_low_consonants, high_consonants, mid_consonants,
             leading_consonants,
-            blends, blend_initials,
+            blending_consonants, blend_initials,
             initial_vowels)
