@@ -42,8 +42,8 @@ class Character():
             return None
         return self.before[-distance]
     def getAfter(self, distance):
-        print(len(self.after) < distance)
-        if len(self.after) < distance:
+        print(len(self.after), distance)
+        if len(self.after) <= distance:
             return None
         return self.after[distance]
     def selfCluster(self, cluster):
@@ -185,8 +185,9 @@ def find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initia
                     if syllable.chars[potential_ii_index].char == 'ี':
                         current_index = append_loop(current_index, potential_y_index)
                         return [current_index, final_vowels, tone_marks]
-                if y.getAfter[0] == '์':
-                    break
+                if y.getAfter(0):
+                    if y.getAfter(0).char == '์':
+                        break
                 current_index = append_loop(current_index, potential_y_index)
                 return [current_index, final_vowels, tone_marks]
 
@@ -196,9 +197,8 @@ def find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initia
 
     after1_char = ''
     if current_index + 2 < len(syllable.chars):
-        after1_char = syllable.chars[current_index].getAfter(1).char    
+        after1_char = syllable.chars[current_index].getAfter(1).char
 
-    print(current_index)
     if (syllable.chars[current_index].char in TONE_MARKS and after0_char == 'ว') or \
         (syllable.chars[current_index].char == 'ั' and after0_char == 'ว') or \
         (syllable.chars[current_index].char == 'ั' and after0_char in TONE_MARKS and after1_char == 'ว'):
