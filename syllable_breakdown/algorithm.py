@@ -191,9 +191,18 @@ def find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initia
                 current_index = append_loop(current_index, potential_y_index)
                 return [current_index, final_vowels, tone_marks]
 
-    if (syllable.chars[current_index].char in TONE_MARKS and syllable.chars[current_index].getAfter(0).char == 'ว') or \
-        (syllable.chars[current_index].char == 'ั' and syllable.chars[current_index].getAfter(0).char == 'ว') or \
-        (syllable.chars[current_index].char == 'ั' and syllable.chars[current_index].getAfter(0).char in TONE_MARKS and syllable.chars[current_index].getAfter(1).char == 'ว'):
+    after0_char = ''
+    if current_index + 1 < len(syllable.chars):
+        after0_char = syllable.chars[current_index].getAfter(0).char
+
+    after1_char = ''
+    if current_index + 2 < len(syllable.chars):
+        after1_char = syllable.chars[current_index].getAfter(1).char    
+
+    print(current_index)
+    if (syllable.chars[current_index].char in TONE_MARKS and after0_char == 'ว') or \
+        (syllable.chars[current_index].char == 'ั' and after0_char == 'ว') or \
+        (syllable.chars[current_index].char == 'ั' and after0_char in TONE_MARKS and after1_char == 'ว'):
             w_vowel = True
 
     if w_vowel:
@@ -204,7 +213,7 @@ def find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initia
         current_index = append_loop(current_index, w_index)
         return [current_index, final_vowels, tone_marks]
     
-    if syllable.chars[current_index].char in TONE_MARKS and syllable.chars[current_index].getAfter(0).char in VOWELS:
+    if syllable.chars[current_index].char in TONE_MARKS and after0_char in VOWELS:
         tone_marks.append(syllable.chars[current_index])
         final_vowels.append(syllable.chars[current_index].getAfter(0))
         current_index += 2
@@ -265,7 +274,7 @@ def extract_clusters(syllable):
 
     return [initial_vowels_cluster, initial_consonants_cluster, tone_marks_cluster, final_vowels_cluster, final_consonants_cluster]
 
-syllable = Syllable('ไทย')
+syllable = Syllable('เหลว')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
 
