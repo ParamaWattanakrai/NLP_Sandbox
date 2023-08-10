@@ -72,16 +72,17 @@ class Syllable:
         tone_marks = []
         final_vowels = []
         final_consonants = []
+        initial_vowels_roles = []
         for initial_vowel in self.initial_vowels_cluster:
-            initial_vowels.append(initial_vowel.char)
+            initial_vowels.append([initial_vowel.char, initial_vowel.role])
         for initial_consonant in self.initial_consonants_cluster:
-            initial_consonants.append(initial_consonant.char)
+            initial_consonants.append([initial_consonant.char, initial_consonant.role])
         for tone_mark in self.tone_marks_cluster:
-            tone_marks.append(tone_mark.char)
+            tone_marks.append([tone_mark.char, tone_mark.role])
         for final_vowel in self.final_vowels_cluster:
-            final_vowels.append(final_vowel.char)
+            final_vowels.append([final_vowel.char, final_vowel.role])
         for final_consonant in self.final_consonants_cluster:
-            final_consonants.append(final_consonant.char)
+            final_consonants.append([final_consonant.char, final_consonant.role])
         information = f'''\
             Syllable String: {self.string}
             Initial Vowels Cluster: {initial_vowels}
@@ -272,7 +273,7 @@ def extract_clusters(syllable):
 
     return [initial_vowels_cluster, initial_consonants_cluster, tone_marks_cluster, final_vowels_cluster, final_consonants_cluster]
 
-syllable = Syllable('เลย')
+syllable = Syllable('เหลือง')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
 print(syllable.getInformation())
