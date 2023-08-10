@@ -41,6 +41,8 @@ class Character:
             return None
         return self.before[-distance]
     def getAfter(self, distance):
+        print(len(self.after), distance)
+        print(len(self.after) < distance)
         if len(self.after) < distance:
             return None
         return self.after[distance]
@@ -151,9 +153,6 @@ def find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initia
                 current_index = append_loop(current_index, potential_y_index)
                 return [current_index, final_vowels, tone_marks]
 
-    if len(syllable.chars) < current_index + 2:
-        return [current_index, final_vowels, tone_marks]
-
     if (syllable.chars[current_index].char in TONE_MARKS and syllable.chars[current_index].getAfter(0).char == 'ว') or \
         (syllable.chars[current_index].char == 'ั' and syllable.chars[current_index].getAfter(0).char == 'ว') or \
         (syllable.chars[current_index].char == 'ั' and syllable.chars[current_index].getAfter(0).char in TONE_MARKS and syllable.chars[current_index].getAfter(1).char == 'ว'):
@@ -214,9 +213,9 @@ def extract_clusters(syllable):
 
     final_consonants_cluster = find_final_consonants_cluster(syllable, current_index)
 
-    return [initial_vowels_cluster, initial_consonants_cluster, final_vowels, tone_marks, final_consonants_cluster]
+    return [initial_vowels_cluster, initial_consonants_cluster, tone_marks, final_vowels, final_consonants_cluster]
 
-syl = SyllableCharacters('เอา')
+syl = SyllableCharacters('ก่อ')
 print(f'Syllable Length: {len(syl.chars)}')
 print(extract_clusters(syl))
 print(0, extract_clusters(syl)[2][0].char)
