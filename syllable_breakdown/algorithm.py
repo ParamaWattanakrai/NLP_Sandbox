@@ -78,6 +78,8 @@ class Syllable:
         self.final_consonants = []
         self.silent_characters = []
 
+        self.final_sound = ''
+
         for index, char in enumerate(string):
             thischar = Character(char, index, self)
             self.chars.append(thischar)
@@ -377,6 +379,8 @@ def extract_roles(syllable):
     return
 
 def get_final_sound(syllable):
+    if not syllable.final_consonants:
+        return 'open'
     if syllable.final_consonants[0].char in K_FINAL_SOUND:
         return 'k'
     if syllable.final_consonants[0].char in P_FINAL_SOUND:
@@ -400,4 +404,5 @@ print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
 extract_roles(syllable)
 print(syllable.getInformation())
-print(get_final_sound(syllable))
+syllable.final_sound = get_final_sound(syllable)
+print(syllable.final_sound)
