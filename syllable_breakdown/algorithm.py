@@ -19,6 +19,15 @@ BLEND_LEADS = th_all.blend_initials
 
 INITIAL_VOWELS = th_all.initial_vowels
 
+K_FINAL_SOUND = th_all.k_final_sound
+P_FINAL_SOUND = th_all.p_final_sound
+T_FINAL_SOUND = th_all.t_final_sound
+N_FINAL_SOUND = th_all.n_final_sound
+M_FINAL_SOUND = th_all.m_final_sound
+Y_FINAL_SOUND = th_all.y_final_sound
+W_FINAL_SOUND = th_all.w_final_sound
+NG_FINAL_SOUND = th_all.ng_final_sound
+
 class Character():
     def __init__(self, char, position, syllable, before=[], after=[], cluster='unknown', char_role='unknown'):
         self.char = char
@@ -137,7 +146,7 @@ class Syllable:
             self.tone_marks.append(char)
         elif role == 'final_consonant':
             char.role = role
-            self.initial_consonants.append(char)
+            self.final_consonants.append(char)
         elif role == 'silent_character':
             char.role = role
             self.silent_characters.append(char)
@@ -345,6 +354,15 @@ def extract_final_consonants_cluster(syllable):
     if not final_consonants_cluster:
         return
     
+    if final_consonants_cluster[-1].char == '์':
+        final_consonants_cluster[-1].selfRole('silent_character')
+        final_consonants_cluster[-2].selfRole('silent_character')
+        return
+    if len(final_consonants_cluster) == 2 and final_consonants_cluster[0].char == 'ร':
+        final_consonants_cluster[0].selfRole('silent_character')
+        final_consonants_cluster[1].selfRole('final_consonant')
+        return
+    
     final_consonants_cluster[0].selfRole('final_consonant')
     for char in final_consonants_cluster[1:]:
         char.selfRole('silent_character')
@@ -358,8 +376,28 @@ def extract_roles(syllable):
     extract_final_consonants_cluster(syllable)
     return
 
-syllable = Syllable('กร่อบ')
+def get_final_sound(syllable):
+    if syllable.final_consonants[0].char in K_FINAL_SOUND:
+        return 'k'
+    if syllable.final_consonants[0].char in P_FINAL_SOUND:
+        return 'p'
+    if syllable.final_consonants[0].char in T_FINAL_SOUND:
+        return 't'
+    if syllable.final_consonants[0].char in N_FINAL_SOUND:
+        return 'n'
+    if syllable.final_consonants[0].char in M_FINAL_SOUND:
+        return 'm'
+    if syllable.final_consonants[0].char in Y_FINAL_SOUND:
+        return 'y'
+    if syllable.final_consonants[0].char in W_FINAL_SOUND:
+        return 'w'
+    if syllable.final_consonants[0].char in NG_FINAL_SOUND:
+        return 'ng'
+    return 'open'
+
+syllable = Syllable('มารถ')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
 extract_roles(syllable)
 print(syllable.getInformation())
+print(get_final_sound(syllable))

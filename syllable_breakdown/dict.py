@@ -58,12 +58,22 @@ blend_initials = []
 
 initial_vowels = ['แ', 'เ', 'โ', 'ไ', 'ใ']
 
+k_final_sound = ['ก','ข','ฃ','ค','ฅ','ฆ']
+p_final_sound = ['บ','ป','ผ','ฝ','พ','ฟ','ภ'] #ฝ
+t_final_sound = ['จ','ฉ','ช','ฌ','ฎ','ฏ','ฐ','ฑ','ฒ','ด','ต','ถ','ท','ธ','ศ','ษ','ส']
+n_final_sound = ['ญ','ณ','น','ร','ล','ฬ']
+m_final_sound = ['ม']
+y_final_sound = ['ย']
+w_final_sound = ['ว']
+ng_final_sound = ['ง']
+
 class ThaiCharDict:
     def __init__(self, consonants, vowels, tone_marks,
             low_consonants, unpaired_low_consonants, paired_low_consonants, high_consonants, mid_consonants,
             leading_consonants,
             blending_consonants, blend_initials,
-            initial_vowels):
+            initial_vowels,
+            k_final_sound, p_final_sound, t_final_sound, n_final_sound, m_final_sound, y_final_sound, w_final_sound, ng_final_sound):
 
         self.consonants = consonants
         self.vowels = vowels
@@ -82,8 +92,18 @@ class ThaiCharDict:
 
         self.initial_vowels = initial_vowels
 
+        self.k_final_sound = k_final_sound
+        self.p_final_sound = p_final_sound
+        self.t_final_sound = t_final_sound
+        self.n_final_sound = n_final_sound
+        self.m_final_sound = m_final_sound
+        self.y_final_sound = y_final_sound
+        self.w_final_sound = w_final_sound
+        self.ng_final_sound = ng_final_sound
+
 th_all = ThaiCharDict(consonants, vowels, tone_marks,
             low_consonants, unpaired_low_consonants, paired_low_consonants, high_consonants, mid_consonants,
             leading_consonants,
             blending_consonants, blend_initials,
-            initial_vowels)
+            initial_vowels,
+            k_final_sound, p_final_sound, t_final_sound, n_final_sound, m_final_sound, y_final_sound, w_final_sound, ng_final_sound)
