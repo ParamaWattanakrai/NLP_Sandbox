@@ -63,15 +63,36 @@ th_chars = {
     'u_forms': ['ุ'],
     'uu_forms': ['ู'],
 
-    'ia_forms': ['เียะ','เีย','','','','',''],
-    'iaia_forms': ['','','','','','',''],
-    'uea_forms': ['','','','','','',''],
-    'ueauea_forms': ['','','','','','',''],
-    'ua_forms': ['','','','','','',''],
-    'uaua_forms': ['','','','','','',''],
+    'ia_forms': ['เียะ'],
+    'iaia_forms': ['เีย'],
+    'uea_forms': ['ือะ'],
+    'ueauea_forms': ['เือ'],
+    'ua_forms': ['ัวะ'],
+    'uaua_forms': ['ว','ัว'], # ะ ว
 
-    'ai_forms': ['','','','','','',''],
-    'aiai': ['','','','','','',''],
+    'ay_forms': ['ไ','ใ','ไย'],
+    'ayay': ['าย'],
+    'oy': ['็ฮย'],
+    'oyoy': ['อย'],
+    'oeyoey': ['เย'],
+    'ohyohy': ['โย'],
+    'uy': ['ุย'],
+    'ueayueay': ['เือย'],
+    'uay': ['วย'],
+    'uayuay': ['วาย'],
+
+    'aw': ['เา'],
+    'awaw': ['าว'],
+    'aew': ['แ็ว'],
+    'aewaew': ['แว'],
+    'eoweow': ['เอว'],
+    'ew': ['เ็ว'],
+    'ewew': ['เว'],
+    'iw': ['ิว'],
+    'iawiaw': ['เียว'],
+
+    'am': ['ำ'], #amam
+    'rue': ['ฤ'],
 }
 
 CONSONANTS = th_chars['consonants']
@@ -100,3 +121,53 @@ M_FINAL_SOUND = th_chars['m_final_sound']
 Y_FINAL_SOUND = th_chars['y_final_sound']
 W_FINAL_SOUND = th_chars['w_final_sound']
 NG_FINAL_SOUND = th_chars['ng_final_sound']
+
+A_FORMS = th_chars['a_forms']
+AA_FORMS = th_chars['aa_forms']
+AE_FORMS = th_chars['ae_forms']
+AEAE_FORMS = th_chars['aeae_forms']
+O_FORMS = th_chars['o_forms']
+OO_FORMS = th_chars['oo_forms']
+E_FORMS = th_chars['e_forms']
+EE_FORMS = th_chars['ee_forms']
+OE_FORMS = th_chars['oe_forms']
+OEOE_FORMS = th_chars['oeoe_forms']
+OH_FORMS = th_chars['oh_forms']
+OHOH_FORMS = th_chars['ohoh_forms']
+I_FORMS = th_chars['i_forms']
+II_FORMS = th_chars['ii_forms']
+UE_FORMS = th_chars['ue_forms']
+UEUE_FORMS = th_chars['ueue_forms']
+U_FORMS = th_chars['u_forms']
+UU_FORMS = th_chars['uu_forms']
+
+IA_FORMS = th_chars['ia_forms']
+IAIA_FORMS = th_chars['iaia_forms']
+UEA_FORMS = th_chars['uea_forms']
+UEAUEA_FORMS = th_chars['ueauea_forms']
+UA_FORMS = th_chars['ua_forms']
+UAUA_FORMS = th_chars['uaua_forms']
+
+AY_FORMS = th_chars['ay_forms']
+AYAY_FORMS = th_chars['ayay']
+OY_FORMS = th_chars['oy']
+OYOY_FORMS = th_chars['oyoy']
+OEYOEY_FORMS = th_chars['oeyoey']
+OHYOHY_FORMS = th_chars['ohyohy']
+UY_FORMS = th_chars['uy']
+UEAYUEAY_FORMS = th_chars['ueayueay']
+UAY_FORMS = th_chars['uay']
+UAYUAY_FORMS = th_chars['uayuay']
+
+AW_FORMS = th_chars['aw']
+AWAW_FORMS = th_chars['awaw']
+AEW_FORMS = th_chars['aew']
+AEWAEW_FORMS = th_chars['aewaew']
+EOWEOW_FORMS = th_chars['eoweow']
+EW_FORMS = th_chars['ew']
+EWEW_FORMS = th_chars['ewew']
+IW_FORMS = th_chars['iw']
+IAWIAW_FORMS = th_chars['iawiaw']
+
+AM_FORMS = th_chars['am']
+RUE_FORMS = th_chars['rue']
