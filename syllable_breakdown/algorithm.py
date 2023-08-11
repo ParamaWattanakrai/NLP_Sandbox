@@ -252,6 +252,11 @@ def find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initia
     if current_index + 2 < len(syllable.chars):
         after1_char = syllable.chars[current_index].getAfter(1).char
 
+    if syllable.chars[current_index].char == 'ฤ':
+        final_vowels.append(syllable.chars[current_index])
+        current_index += 1
+        return [current_index, final_vowels, tone_marks]
+
     if syllable.chars[current_index].char == 'ร' and after0_char == 'ร':
         final_vowels.append(syllable.chars[current_index])
         final_vowels.append(syllable.chars[current_index].getAfter(0))
@@ -401,11 +406,109 @@ def process_final_sound(syllable):
     syllable.final_sound = final_sound
     return final_sound
 
-def process_vowel(syllable):
+def get_default_vowel(vowel_string):
+    if vowel_string in A_FORMS:
+        return 'ะ'
+    if vowel_string in AA_FORMS:
+        return 'า'
+    if vowel_string in AE_FORMS:
+        return 'แ-ะ'
+    if vowel_string in AEAE_FORMS:
+        return
+    if vowel_string in O_FORMS:
+        return
+    if vowel_string in OO_FORMS:
+        return
+    if vowel_string in E_FORMS:
+        return
+    if vowel_string in EE_FORMS:
+        return
+    if vowel_string in OE_FORMS:
+        return
+    if vowel_string in OE_OE_FORMS:
+        return
+    if vowel_string in OH_FORMS:
+        return
+    if vowel_string in OH_OH_FORMS:
+        return
+    if vowel_string in I_FORMS:
+        return
+    if vowel_string in II_FORMS:
+        return
+    if vowel_string in UE_FORMS:
+        return
+    if vowel_string in UEUE_FORMS:
+        return
+    if vowel_string in U_FORMS:
+        return
+    if vowel_string in UU_FORMS:
+        return
 
+    if vowel_string in IA_FORMS:
+        return
+    if vowel_string in IAIA_FORMS:
+        return
+    if vowel_string in UEA_FORMS:
+        return
+    if vowel_string in UEAUEA_FORMS:
+        return
+    if vowel_string in UA_FORMS:
+        return
+    if vowel_string in UAUA_FORMS:
+        return
+
+    if vowel_string in AY_FORMS:
+        return
+    if vowel_string in AYAY_FORMS:
+        return
+    if vowel_string in OY_FORMS:
+        return
+    if vowel_string in OYOY_FORMS:
+        return
+    if vowel_string in OEYOEY_FORMS:
+        return
+    if vowel_string in OHYOHY_FORMS:
+        return
+    if vowel_string in UY_FORMS:
+        return
+    if vowel_string in UEAYUEAY_FORMS:
+        return
+    if vowel_string in UAY_FORMS:
+        return
+    if vowel_string in UAYUAY_FORMS:
+        return
+
+    if vowel_string in AW_FORMS:
+        return
+    if vowel_string in AWW_FORMS:
+        return
+    if vowel_string in AEW_FORMS:
+        return
+    if vowel_string in AEWAEW_FORMS:
+        return
+    if vowel_string in EOWEOW_FORMS:
+        return
+    if vowel_string in EW_FORMS:
+        return
+    if vowel_string in EWEW_FORMS:
+        return
+    if vowel_string in IW_FORMS:
+        return
+    if vowel_string in IAWIAW_FORMS:
+        return
+
+    if vowel_string in AM_FORMS:
+        return
+    if vowel_string in RUE_FORMS:
+        return
+    
+
+def process_vowel(syllable):
+    vowel_string = syllable.getVowel()
+    get_default_vowel(vowel_string):
     return
 
-syllable = Syllable('เสือ')
+syllable = Syllable('สัว')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
 extract_roles(syllable)
