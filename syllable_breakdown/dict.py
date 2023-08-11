@@ -1,3 +1,56 @@
+class BidirectionalDict:
+    def __init__(self):
+        self.forward_dict = {}
+        self.reverse_dict = {}
+
+    def __setitem__(self, key, value):
+        self.forward_dict[key] = value
+        self.reverse_dict[value] = key
+
+    def __getitem__(self, key):
+        return self.forward_dict[key]
+
+    def reverse_get(self, value):
+        return self.reverse_dict[value]
+
+    def get_forward_keys(self):
+        return list(self.forward_dict.keys())
+
+    def get_reverse_keys(self):
+        return list(self.reverse_dict.keys())
+
+    def __str__(self):
+        return str(self.forward_dict)
+    
+SHORT_LONG_VOWEL_PAIRS = BidirectionalDict()
+SHORT_LONG_VOWEL_PAIRS['-ะ'] = '-า'
+SHORT_LONG_VOWEL_PAIRS['แ-ะ'] = 'แ-'
+SHORT_LONG_VOWEL_PAIRS['เ-าะ'] = '-อ'
+SHORT_LONG_VOWEL_PAIRS['เ-ะ'] = 'เ-'
+SHORT_LONG_VOWEL_PAIRS['เ-อะ'] = 'เ-อ'
+SHORT_LONG_VOWEL_PAIRS['โ-ะ'] = 'โ'
+SHORT_LONG_VOWEL_PAIRS['-ิ'] = '-ี'
+SHORT_LONG_VOWEL_PAIRS['-ึ'] = '-ื'
+SHORT_LONG_VOWEL_PAIRS['-ุ'] = '-ู'
+SHORT_LONG_VOWEL_PAIRS['เ-ียะ'] = 'เ-ีย'
+SHORT_LONG_VOWEL_PAIRS['เ-ือะ'] = 'เ-ือ'
+SHORT_LONG_VOWEL_PAIRS['-ัวะ'] = '-ัว'
+SHORT_LONG_VOWEL_PAIRS['ไ-'] = '-าย'
+SHORT_LONG_VOWEL_PAIRS['-็อย'] = '-อย'
+SHORT_LONG_VOWEL_PAIRS['-'] = 'เ-ย'
+SHORT_LONG_VOWEL_PAIRS['-'] = 'โ-ย'
+SHORT_LONG_VOWEL_PAIRS['-ุย'] = ''
+SHORT_LONG_VOWEL_PAIRS['-'] = 'เ-ือย'
+SHORT_LONG_VOWEL_PAIRS['-'] = '-วย'
+SHORT_LONG_VOWEL_PAIRS['-'] = '-วาย'
+SHORT_LONG_VOWEL_PAIRS['เ-า'] = '-าว'
+SHORT_LONG_VOWEL_PAIRS['แ-็ว'] = 'แ-ว'
+SHORT_LONG_VOWEL_PAIRS['-'] = 'เ-อว'
+SHORT_LONG_VOWEL_PAIRS['เ-็ว'] = 'เ-ว'
+SHORT_LONG_VOWEL_PAIRS['-ิว'] = 'เ-ียว'
+SHORT_LONG_VOWEL_PAIRS['-ำ'] = ''
+SHORT_LONG_VOWEL_PAIRS['-ฤ'] = ''
+
 th_chars = {
     'consonants': [
         'ก', 'ข', 'ฃ', 'ค', 'ฅ', 'ฆ', 'ง', 'จ', 'ฉ', 'ช',
@@ -137,9 +190,9 @@ th_chars = {
         '-ำ': ['ำ'], #amam
         '-ฤ': ['ฤ'],
     },
-
-    'short_vowel_forms': []
 }
+
+
 
 CONSONANTS = th_chars['consonants']
 VOWELS = th_chars['vowels']

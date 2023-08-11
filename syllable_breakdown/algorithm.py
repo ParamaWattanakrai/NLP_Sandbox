@@ -55,6 +55,14 @@ class Syllable:
         self.initial_sound = ''
         self.final_sound = ''
 
+        self.vowel_default = ''
+        self.vowel_duration = ''
+        self.vowel_short = ''
+
+        self.vowel_long = ''
+        
+        self.live_dead = ''
+
         for index, char in enumerate(string):
             thischar = Character(char, index, self)
             self.chars.append(thischar)
@@ -93,17 +101,17 @@ class Syllable:
             Final Vowels Cluster: {final_vowels}
             Final Consonants Cluster: {final_consonants}
 
-            Initial Sound:
+            Initial Sound: {self.initial_sound}
             Final Sound: {self.final_sound}
             
             Vowel Form: {vowels}
-            Vowel Default Form:
-            Vowel Duration:
+            Vowel Default Form: {self.vowel_default}
+            Vowel Duration: {self.vowel_duration}
 
-            Vowel Long Form:
-            Vowel Short Form:
+            Vowel Short Form: {self.vowel_short}
+            Vowel Long Form: {self.vowel_long}
 
-            Live/Dead:
+            Live/Dead: {self.live_dead}
             '''
         return information
     def assignCluster(self, char, cluster):
@@ -407,7 +415,6 @@ def process_final_sound(syllable):
     return final_sound
 
 def get_default_vowel(vowel_string):
-    print(vowel_string)
     vowel_forms_keys = VOWEL_FORMS.keys()
     for key in vowel_forms_keys:
         if vowel_string in VOWEL_FORMS[key]:
@@ -418,10 +425,20 @@ def process_vowel(syllable):
     vowel_string = ''
     for char in syllable.getVowel():
         vowel_string = vowel_string + char.char
-    print(get_default_vowel(vowel_string))
+    vowel_default = get_default_vowel(vowel_string)
+    syllable.vowel_default = get_default_vowel(vowel_string)
+    print(vowel_default)
+    if vowel_default in SHORT_LONG_VOWEL_PAIRS.get_forward_keys():
+        syllable.vowel_duration = 'short'
+        syllable.vowel_short = vowel_default
+        syllable.vowel_long = SHORT_LONG_VOWEL_PAIRS[vowel_default]
+    else:
+        syllable.vowel_duration = 'long'
+        syllable.vowel_short = SHORT_LONG_VOWEL_PAIRS.reverse_get(vowel_default)
+        syllable.vowel_long = vowel_default
     return
 
-syllable = Syllable('สัว')
+syllable = Syllable('พวย')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
 extract_roles(syllable)
