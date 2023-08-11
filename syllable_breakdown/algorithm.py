@@ -386,6 +386,10 @@ def extract_roles(syllable):
     extract_final_consonants_cluster(syllable)
     return
 
+def process_initial_sound(syllable):
+    initial_sound = ''
+    
+
 def process_final_sound(syllable):
     final_sound = '-'
     if not syllable.final_consonants:
@@ -395,32 +399,17 @@ def process_final_sound(syllable):
                 return
         syllable.final_sound = final_sound
         return final_sound
-    if syllable.final_consonants[0].char in K_FINAL_SOUND:
-        final_sound = 'ก'
-    if syllable.final_consonants[0].char in P_FINAL_SOUND:
-        final_sound = 'บ'
-    if syllable.final_consonants[0].char in T_FINAL_SOUND:
-        final_sound = 'ด'
-    if syllable.final_consonants[0].char in N_FINAL_SOUND:
-        final_sound = 'น'
-    if syllable.final_consonants[0].char in M_FINAL_SOUND:
-        final_sound = 'ม'
-    if syllable.final_consonants[0].char in Y_FINAL_SOUND:
-        final_sound = 'ย'
-    if syllable.final_consonants[0].char in W_FINAL_SOUND:
-        final_sound = 'ว'
-    if syllable.final_consonants[0].char in NG_FINAL_SOUND:
-        final_sound = 'ง'
+    for final_sound_key in FINAL_SOUNDS.keys():
+        if syllable.final_consonants[0].char in FINAL_SOUNDS[final_sound_key]:
+            final_sound = final_sound_key
     syllable.final_sound = final_sound
     return final_sound
 
 def get_default_vowel(vowel_string):
-    vowel_forms_keys = VOWEL_FORMS.keys()
-    for key in vowel_forms_keys:
-        if vowel_string in VOWEL_FORMS[key]:
-            return key
+    for vowel_forms_key in VOWEL_FORMS.keys():
+        if vowel_string in VOWEL_FORMS[vowel_forms_key]:
+            return vowel_forms_key
     
-
 def process_vowel(syllable):
     vowel_string = ''
     for char in syllable.getVowel():
@@ -442,6 +431,7 @@ syllable = Syllable('พวย')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
 extract_roles(syllable)
+process_initial_sound(syllable)
 process_final_sound(syllable)
 process_vowel(syllable)
 print(syllable.getInformation())
