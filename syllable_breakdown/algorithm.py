@@ -1,32 +1,6 @@
 # from classes import Character, Syllable
 
-from dict import th_all
-
-CONSONANTS = th_all.consonants
-VOWELS = th_all.vowels
-TONE_MARKS = th_all.tone_marks
-
-LOW_CONSONANTS = th_all.low_consonants
-UNPAIRED_LOW_CONSONANTS = th_all.unpaired_low_consonants
-PAIRED_LOW_CONSONANTS = th_all.paired_low_consonants
-HIGH_CONSONANTS = th_all.high_consonants
-MID_CONSONANTS = th_all.mid_consonants
-
-LEADING_CONSONANTS = th_all.leading_consonants
-
-BLENDING_CONSONANTS = th_all.blending_consonants
-BLEND_LEADS = th_all.blend_initials
-
-INITIAL_VOWELS = th_all.initial_vowels
-
-K_FINAL_SOUND = th_all.k_final_sound
-P_FINAL_SOUND = th_all.p_final_sound
-T_FINAL_SOUND = th_all.t_final_sound
-N_FINAL_SOUND = th_all.n_final_sound
-M_FINAL_SOUND = th_all.m_final_sound
-Y_FINAL_SOUND = th_all.y_final_sound
-W_FINAL_SOUND = th_all.w_final_sound
-NG_FINAL_SOUND = th_all.ng_final_sound
+from dict import *
 
 class Character():
     def __init__(self, char, position, syllable, before=[], after=[], cluster='unknown', char_role='unknown'):
@@ -431,7 +405,7 @@ def process_vowel(syllable):
 
     return
 
-syllable = Syllable('ควาย')
+syllable = Syllable('เสือ')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
 extract_roles(syllable)
