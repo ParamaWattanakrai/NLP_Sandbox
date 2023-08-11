@@ -210,7 +210,9 @@ def find_initial_consonants_cluster(syllable, current_index, ee_initial, ay_init
                 return [current_index, initial_consonants, w_vowel]
 
             if potential_second_consonant.char == 'ร' or potential_second_consonant.char == 'ล':
-                if first_consonant.char not in R_L_BLENDING_INITIALS:
+                if first_consonant.char in R_L_BLENDING_INITIALS:
+                    initial_consonants.append(potential_second_consonant)
+                    current_index += 1
                     return [current_index, initial_consonants, w_vowel]
             
             if potential_second_consonant.char == 'ว':
@@ -237,9 +239,7 @@ def find_initial_consonants_cluster(syllable, current_index, ee_initial, ay_init
                 initial_consonants.append(potential_second_consonant)
                 current_index += 1
                 return [current_index, initial_consonants, w_vowel]
-
-            initial_consonants.append(potential_second_consonant)
-            current_index += 1
+            
             return [current_index, initial_consonants, w_vowel]
 
     return [current_index, initial_consonants, w_vowel]
@@ -436,22 +436,30 @@ def get_default_vowel(vowel_string):
     
 def process_vowel(syllable):
     vowel_string = syllable.getVowelString()
-    vowel_default = get_default_vowel(vowel_string)
-    syllable.vowel_default = get_default_vowel(vowel_string)
+    if not vowel_string:
+        if not syllable.final_consonants:
+            syllable.vowel_default = '-ะ'
+        else:
+            syllable.vowel_default = 'โ-ะ'
+    else:
+        syllable.vowel_default = get_default_vowel(vowel_string)
 
-    if vowel_default in SHORT_LONG_VOWEL_PAIRS.get_forward_keys():
+    if syllable.vowel_default in SHORT_LONG_VOWEL_PAIRS.get_forward_keys():
         syllable.vowel_duration = 'short'
-        syllable.vowel_short = vowel_default
-        syllable.vowel_long = SHORT_LONG_VOWEL_PAIRS[vowel_default]
+        syllable.vowel_short = syllable.vowel_default
+        syllable.vowel_long = SHORT_LONG_VOWEL_PAIRS[syllable.vowel_default]
     else:
         syllable.vowel_duration = 'long'
-        syllable.vowel_short = SHORT_LONG_VOWEL_PAIRS.reverse_get(vowel_default)
-        syllable.vowel_long = vowel_default
+        syllable.vowel_short = SHORT_LONG_VOWEL_PAIRS.reverse_get(syllable.vowel_default)
+        syllable.vowel_long = syllable.vowel_default
     return
 
 def process_final_sound(syllable):
     final_sound = '-'
     vowel_string = syllable.getVowelString()
+    if not vowel_string:
+        syllable.final_sound = final_sound
+        return
     if not syllable.final_consonants:
         if vowel_string[-1] == 'ำ':
             final_sound = 'ม'
@@ -511,10 +519,8 @@ def process_tone(syllable):
         syllable.tone = 'rising'
         print('rising')
     return
-
-# Implied a and oh
-
-syllable = Syllable('อย่า')
+    
+syllable = Syllable('กลัว')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
 extract_roles(syllable)
