@@ -387,7 +387,10 @@ def extract_roles(syllable):
     return
 
 def process_initial_sound(syllable):
-    initial_sound = ''
+    for initial_sound_key in INITIAL_SOUNDS.keys():
+        if syllable.initial_consonants[0].char in INITIAL_SOUNDS[initial_sound_key]:
+            syllable.initial_sound = initial_sound_key
+            return
     
 
 def process_final_sound(syllable):
