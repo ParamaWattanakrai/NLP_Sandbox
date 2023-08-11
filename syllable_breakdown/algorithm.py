@@ -158,6 +158,11 @@ class Syllable:
             return None
     def getVowel(self):
         return self.initial_vowels_cluster + self.final_vowels_cluster
+    def getVowelString(self):
+        vowel_string = ''
+        for char in self.getVowel():
+            vowel_string = vowel_string + char.char
+        return vowel_string
 
 def find_initial_vowels_cluster(syllable):
     initial_vowels = []
@@ -168,7 +173,7 @@ def find_initial_vowels_cluster(syllable):
 
     return [current_index, initial_vowels]
 
-def find_initial_consonants_cluster(syllable, current_index, ee_initial, ai_initial):
+def find_initial_consonants_cluster(syllable, current_index, ee_initial, ay_initial):
     w_vowel = False
 
     first_consonant = syllable.chars[current_index]
@@ -182,7 +187,7 @@ def find_initial_consonants_cluster(syllable, current_index, ee_initial, ai_init
             if potential_second_consonant.char == 'อ':
                 return [current_index, initial_consonants, w_vowel]
             
-            if potential_second_consonant.char == 'ย' and (ee_initial or ai_initial):
+            if potential_second_consonant.char == 'ย' and (ee_initial or ay_initial):
                 return [current_index, initial_consonants, w_vowel]
 
             if potential_second_consonant.char == 'ว':
@@ -209,7 +214,7 @@ def find_initial_consonants_cluster(syllable, current_index, ee_initial, ai_init
 
     return [current_index, initial_consonants, w_vowel]
 
-def find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initial, ai_initial, w_vowel):
+def find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initial, ay_initial, w_vowel):
     final_vowels = []
     tone_marks = []
 
@@ -238,7 +243,7 @@ def find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initia
     for potential_y_index in range(current_index, len(syllable.chars)):
         if syllable.chars[potential_y_index].char == 'ย':
             y = syllable.chars[potential_y_index]
-            if ai_initial:
+            if ay_initial:
                 current_index = append_loop(current_index, potential_y_index)
                 return [current_index, final_vowels, tone_marks]
             if ee_initial:
@@ -307,7 +312,7 @@ def find_final_consonants_cluster(syllable, current_index):
 
 def extract_clusters(syllable):
     ee_initial = False
-    ai_initial = False
+    ay_initial = False
 
     initial_vowels_cluster_info = find_initial_vowels_cluster(syllable)
     current_index = initial_vowels_cluster_info[0]
@@ -317,14 +322,14 @@ def extract_clusters(syllable):
         if initial_vowels_cluster[0].char == 'เ':
             ee_initial = True
         if initial_vowels_cluster[0].char == 'ไ':
-            ai_initial = True
+            ay_initial = True
 
-    initial_consonants_cluster_info = find_initial_consonants_cluster(syllable, current_index, ee_initial, ai_initial)
+    initial_consonants_cluster_info = find_initial_consonants_cluster(syllable, current_index, ee_initial, ay_initial)
     current_index = initial_consonants_cluster_info[0]
     initial_consonants_cluster = initial_consonants_cluster_info[1]
     w_vowel = initial_consonants_cluster_info[2]
 
-    final_vowels_and_tone_marks_clusters_info = find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initial, ai_initial, w_vowel)
+    final_vowels_and_tone_marks_clusters_info = find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initial, ay_initial, w_vowel)
     current_index = final_vowels_and_tone_marks_clusters_info[0]
     final_vowels_cluster = final_vowels_and_tone_marks_clusters_info[1]
     tone_marks_cluster = final_vowels_and_tone_marks_clusters_info[2]
@@ -392,31 +397,13 @@ def process_initial_sound(syllable):
             syllable.initial_sound = initial_sound_key
             return
     
-
-def process_final_sound(syllable):
-    final_sound = '-'
-    if not syllable.final_consonants:
-        if syllable.final_vowels_cluster:
-            if syllable.final_vowels_cluster[0] == 'ำ':
-                syllable.final_sound = 'ม'
-                return
-        syllable.final_sound = final_sound
-        return final_sound
-    for final_sound_key in FINAL_SOUNDS.keys():
-        if syllable.final_consonants[0].char in FINAL_SOUNDS[final_sound_key]:
-            final_sound = final_sound_key
-    syllable.final_sound = final_sound
-    return final_sound
-
 def get_default_vowel(vowel_string):
     for vowel_forms_key in VOWEL_FORMS.keys():
         if vowel_string in VOWEL_FORMS[vowel_forms_key]:
             return vowel_forms_key
     
 def process_vowel(syllable):
-    vowel_string = ''
-    for char in syllable.getVowel():
-        vowel_string = vowel_string + char.char
+    vowel_string = syllable.getVowelString()
     vowel_default = get_default_vowel(vowel_string)
     syllable.vowel_default = get_default_vowel(vowel_string)
     print(vowel_default)
@@ -430,14 +417,46 @@ def process_vowel(syllable):
         syllable.vowel_long = vowel_default
     return
 
-# -ัว decision
+def process_final_sound(syllable):
+    final_sound = '-'
+    vowel_string = syllable.getVowelString()
+    if not syllable.final_consonants:
+        if vowel_string[-1] == 'ำ':
+            final_sound = 'ม'
+        if vowel_string[0] == 'ไ' or vowel_string[0] == 'ใ':
+            final_sound = 'ย'
+        if vowel_string[0] == 'เ' and vowel_string[1] == 'า':
+            final_sound = 'ว'
+        syllable.final_sound = final_sound
+        return final_sound
+    for final_sound_key in FINAL_SOUNDS.keys():
+        if syllable.final_consonants[0].char in FINAL_SOUNDS[final_sound_key]:
+            final_sound = final_sound_key
+    syllable.final_sound = final_sound
+    return final_sound
 
-syllable = Syllable('พวย')
+
+def process_live_dead(syllable):
+    if syllable.final_sound == '-':
+        if syllable.vowel_duration == 'short':
+            syllable.live_dead = 'dead'
+        if syllable.vowel_duration == 'long':
+            syllable.live_dead = 'live'
+        return
+    if syllable.final_sound in DEAD_FINAL_SOUNDS:
+        syllable.live_dead = 'dead'
+    elif syllable.final_sound in LIVE_FINAL_SOUNDS:
+        syllable.live_dead = 'live'
+
+
+# เบว broken
+
+syllable = Syllable('เขา')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
 extract_roles(syllable)
 process_initial_sound(syllable)
 process_final_sound(syllable)
 process_vowel(syllable)
+process_live_dead(syllable)
 print(syllable.getInformation())
-print(syllable.final_sound)

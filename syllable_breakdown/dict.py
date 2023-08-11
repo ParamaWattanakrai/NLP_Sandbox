@@ -97,8 +97,8 @@ th_chars = {
         'พ': ['ผ','พ','ภ'],
         'ฟ': ['ฝ','ฟ'],
         'ม': ['ม'],
-        'ร': ['ร'],
-        'ล': ['ล','ฬ'],
+        'ร': ['ร','ฤ'],
+        'ล': ['ล','ฬ','ฦ'],
         'ว': ['ว'],
         'ฮ': ['ห','ฮ'],
         'อ': ['อ']
@@ -114,6 +114,9 @@ th_chars = {
         'ว': ['ว'],
         'ง': ['ง'],
     },
+
+    'live_final_sounds': ['น','ม','ย','ว','ง'],
+    'dead_final_sounds': ['ก','บ','ด'],
 
     'vowel_forms': {
         '-ะ': ['ั', 'รร', 'ะ'],
@@ -190,5 +193,8 @@ INITIAL_VOWELS = th_chars['initial_vowels']
 
 INITIAL_SOUNDS = th_chars['initial_sounds']
 FINAL_SOUNDS = th_chars['final_sounds']
+
+LIVE_FINAL_SOUNDS = th_chars['live_final_sounds']
+DEAD_FINAL_SOUNDS = th_chars['dead_final_sounds']
 
 VOWEL_FORMS = th_chars['vowel_forms']
