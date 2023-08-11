@@ -1,4 +1,33 @@
-# from classes import Character, Syllable
+import torch
+import torch.nn as nn
+import torch.optim as optim
+from pythainlp.tokenize import syllable_tokenize
+
+n_input = 16
+n_hidden = 128
+n_output = 2
+batch_size = 1
+learning_rate = 0.005
+num_epochs = 30000
+
+# class ANN(nn.Module):
+#     def __init__(self, input_size, hidden_size, output_size):
+#         super(ANN, self).__init__()
+#         self.hidden_size = hidden_size
+#         self.relu = nn.ReLU
+#         self.hidden_layer = nn.Linear(input_size + hidden_size, hidden_size)
+#         self.output_layer = nn.Linear(hidden_size, output_size)
+#         self.softmax = nn.LogSoftmax(dim=1)
+    
+#     def forward(self, input):
+#         hidden1 = self.relu(self.hidden_layer(input)) 
+#         output = self.softmax(self.output_layer(hidden1))
+#         return output 
+
+# model = ANN(n_input, n_hidden, n_output)
+
+# criterion = nn.NLLLoss()
+# optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
 from dict import *
 
@@ -496,39 +525,43 @@ def process_tone(syllable):
     syllable.tone = 'uncalculable'
     if ((syllable.initial_class == 'mid' or syllable.initial_class == 'low') and syllable.live_dead == 'live' and not syllable.tone_mark):
         syllable.tone = 'mid'
-        print('mid')
     if  ((syllable.initial_class == 'mid' or syllable.initial_class == 'high') and syllable.live_dead == 'live' and syllable.tone_mark == '่') or \
         ((syllable.initial_class == 'mid' or syllable.initial_class == 'high') and syllable.live_dead == 'dead' and not syllable.tone_mark):
         syllable.tone = 'low'
-        print('low')
     if ((syllable.initial_class == 'mid' or syllable.initial_class == 'high') and syllable.tone_mark == '้') or \
         (syllable.initial_class == 'low' and syllable.live_dead == 'live' and syllable.tone_mark == '่') or \
         (syllable.initial_class == 'low' and syllable.live_dead == 'dead' and syllable.vowel_duration == 'short' and syllable.tone_mark == '่') or \
         (syllable.initial_class == 'low' and syllable.live_dead == 'dead' and syllable.vowel_duration == 'long' and not syllable.tone_mark):
         syllable.tone = 'falling'
-        print('falling')
     if (syllable.initial_class == 'mid' and syllable.tone_mark == '๊') or \
         (syllable.initial_class == 'low' and syllable.live_dead == 'live' and syllable.tone_mark == '้') or \
         (syllable.initial_class == 'low' and syllable.live_dead == 'dead' and syllable.vowel_duration == 'long' and syllable.tone_mark == '้') or \
         (syllable.initial_class == 'low' and syllable.live_dead == 'dead' and syllable.vowel_duration == 'short' and not syllable.tone_mark):
         syllable.tone = 'high'
-        print('high')
     if (syllable.initial_class == 'mid' and syllable.tone_mark == '๋') or \
         (syllable.initial_class == 'low' and syllable.live_dead == 'dead' and syllable.tone_mark == '๋') or \
         (syllable.initial_class == 'high' and syllable.live_dead == 'live' and not syllable.tone_mark):
         syllable.tone = 'rising'
-        print('rising')
     return
-    
-syllable = Syllable('ค่า')
-print(f'Syllable Length: {len(syllable.chars)}')
-extract_clusters(syllable)
-extract_roles(syllable)
-process_initial_sound(syllable)
-process_initial_class(syllable)
-process_final_sound(syllable)
-process_vowel(syllable)
-process_live_dead(syllable)
-process_tone_mark(syllable)
-process_tone(syllable)
-print(syllable.getInformation())
+
+while True:
+    sentence = input("\n>>> ")
+    if sentence.lower() == "ออก":
+        break
+    if sentence.lower() == "":
+        print("ใส่คำมา")
+        continue
+    syllable_sentan = syllable_tokenize(sentence)
+    print(syllable_sentan)
+    for syllable_string in syllable_sentan:
+        syllable = Syllable(syllable_string)
+        extract_clusters(syllable)
+        extract_roles(syllable)
+        process_initial_sound(syllable)
+        process_initial_class(syllable)
+        process_final_sound(syllable)
+        process_vowel(syllable)
+        process_live_dead(syllable)
+        process_tone_mark(syllable)
+        process_tone(syllable)
+        print(syllable.getInformation())

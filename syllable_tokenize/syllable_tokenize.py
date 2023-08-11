@@ -36,7 +36,7 @@ while True:
     if sentence.lower() == "":
         print("ใส่คำมา")
         continue
-    syllable_sentan = syllable_tokenize(sentence, keep_whitespace=False)
+    syllable_sentan = syllable_tokenize(sentence)
     TwoSyllable = []
     for i in range(len(syllable_sentan) - 1):
         TwoSyllable.append([syllable_sentan[i], syllable_sentan[i+1]])
