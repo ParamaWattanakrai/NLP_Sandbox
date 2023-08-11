@@ -430,6 +430,8 @@ def process_vowel(syllable):
         syllable.vowel_long = vowel_default
     return
 
+# -ัว decision
+
 syllable = Syllable('พวย')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
