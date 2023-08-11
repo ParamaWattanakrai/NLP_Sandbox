@@ -441,7 +441,6 @@ def process_final_sound(syllable):
     syllable.final_sound = final_sound
     return final_sound
 
-
 def process_live_dead(syllable):
     if syllable.final_sound == '-':
         if syllable.vowel_duration == 'short':
