@@ -65,6 +65,11 @@ th_chars = {
         ],
     'tone_marks': ['่','้','๊','๋'],
 
+    'consonant_classes': {
+        'low': ['ง','ญ','ณ','น','ม','ย','ร','ฤ','ล','ฦ','ว','ฬ','ค','ฅ','ฆ','ช','ซ','ฌ','ฑ','ฒ','ท','ธ','พ','ฟ','ภ','ฮ'],
+        'high': ['ข','ฃ','ฉ','ฐ','ถ','ผ','ฝ','ศ','ษ','ส','ห'],
+        'mid': ['ก','จ','ฎ','ฏ','ด','ต','บ','ป','อ'],
+    },
 
     'low_consonants': ['ง','ญ','ณ','น','ม','ย','ร','ฤ','ล','ฦ','ว','ฬ'],
     'unpaired_low_consonants': ['ง','ญ','ณ','น','ม','ย','ร','ล','ว','ฬ'],
@@ -177,11 +182,13 @@ CONSONANTS = th_chars['consonants']
 VOWELS = th_chars['vowels']
 TONE_MARKS = th_chars['tone_marks']
 
-LOW_CONSONANTS = th_chars['low_consonants']
+CONSONANT_CLASSES = th_chars['consonant_classes']
+
+LOW_CONSONANTS = th_chars['consonant_classes']['low']
 UNPAIRED_LOW_CONSONANTS = th_chars['unpaired_low_consonants']
 PAIRED_LOW_CONSONANTS = th_chars['paired_low_consonants']
-HIGH_CONSONANTS = th_chars['high_consonants']
-MID_CONSONANTS = th_chars['mid_consonants']
+HIGH_CONSONANTS = th_chars['consonant_classes']['high']
+MID_CONSONANTS = th_chars['consonant_classes']['mid']
 
 LEADING_CONSONANTS = th_chars['leading_consonants']
 

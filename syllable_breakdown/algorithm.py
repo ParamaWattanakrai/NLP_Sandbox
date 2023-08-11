@@ -3,7 +3,7 @@
 from dict import *
 
 class Character():
-    def __init__(self, char, position, syllable, before=[], after=[], cluster='unknown', char_role='unknown'):
+    def __init__(self, char, syllable, position, before=[], after=[], cluster='unknown', char_role='unknown'):
         self.char = char
         self.position = position
         self.syllable = syllable
@@ -11,6 +11,9 @@ class Character():
         self.after = after
         self.cluster = cluster
         self.role = char_role
+        for consonant_class_key in CONSONANT_CLASSES.keys():
+            if self.char in CONSONANT_CLASSES[consonant_class_key]:
+                self.consonant_class = consonant_class_key
     def getInformation(self):
         chars_before = []
         chars_after = []
@@ -18,7 +21,14 @@ class Character():
             chars_before.append(char.char)
         for char in self.after:
             chars_after.append(char.char)
-        return f'Character: {self.char}\nPosition: {self.position}\nIn Cluster: {self.cluster}\nRole: {self.role}\nChracters Before: {chars_before}\nCharacters After: {chars_after}'
+        return f'''
+            Character: {self.char}
+            In Syllable: {self.syllable.string}
+            Position: {self.position}
+            Class: {self.consonant_class}
+            In Cluster: {self.cluster}
+            Role: {self.role}\nChracters Before: {chars_before}\nCharacters After: {chars_after}
+            '''
     def getBefore(self, distance):
         distance += 1
         if len(self.before) < distance:
@@ -53,6 +63,7 @@ class Syllable:
         self.silent_characters = []
 
         self.initial_sound = ''
+        self.initial_class = ''
         self.final_sound = ''
 
         self.vowel_default = ''
@@ -63,8 +74,10 @@ class Syllable:
         
         self.live_dead = ''
 
+        self.tone = ''
+
         for index, char in enumerate(string):
-            thischar = Character(char, index, self)
+            thischar = Character(char, self, index)
             self.chars.append(thischar)
         for index, char in enumerate(self.chars):
             char.before = self.chars[:index]
@@ -93,7 +106,7 @@ class Syllable:
         for char in self.getVowel():
             vowels.append(char.char)
 
-        information = f'''\
+        information = f'''
             Syllable String: {self.string}
             Initial Vowels Cluster: {initial_vowels}
             Initial Consonants Cluster: {initial_consonants}
@@ -102,6 +115,7 @@ class Syllable:
             Final Consonants Cluster: {final_consonants}
 
             Initial Sound: {self.initial_sound}
+            Inital Class: {self.initial_class}
             Final Sound: {self.final_sound}
             
             Vowel Form: {vowels}
@@ -112,6 +126,8 @@ class Syllable:
             Vowel Long Form: {self.vowel_long}
 
             Live/Dead: {self.live_dead}
+
+            Tone: {self.tone}
             '''
         return information
     def assignCluster(self, char, cluster):
@@ -184,6 +200,7 @@ def find_initial_consonants_cluster(syllable, current_index, ee_initial, ay_init
     if first_consonant.getAfter(0):
         potential_second_consonant = first_consonant.getAfter(0)
         if potential_second_consonant.char in CONSONANTS:
+
             if potential_second_consonant.char == 'อ':
                 return [current_index, initial_consonants, w_vowel]
             
@@ -193,7 +210,7 @@ def find_initial_consonants_cluster(syllable, current_index, ee_initial, ay_init
             if potential_second_consonant.char == 'ร' or potential_second_consonant.char == 'ล':
                 if first_consonant.char not in R_L_BLENDING_INITIALS:
                     return [current_index, initial_consonants, w_vowel]
-
+            
             if potential_second_consonant.char == 'ว':
                 if first_consonant.char not in W_BLENDING_INITIALS:
                     return [current_index, initial_consonants, w_vowel]
@@ -207,6 +224,11 @@ def find_initial_consonants_cluster(syllable, current_index, ee_initial, ay_init
             
             if potential_second_consonant.getAfter(0):
                 if potential_second_consonant.char == 'ร' and potential_second_consonant.getAfter(0).char == 'ร':
+                    return [current_index, initial_consonants, w_vowel]
+                if first_consonant.char == 'อ' and potential_second_consonant.char == 'ย' or \
+                    first_consonant.char == 'ห' and potential_second_consonant.char in UNPAIRED_LOW_CONSONANTS:
+                    initial_consonants.append(potential_second_consonant)
+                    current_index += 1
                     return [current_index, initial_consonants, w_vowel]
                 if potential_second_consonant.char not in BLENDING_CONSONANTS:
                     return [current_index, initial_consonants, w_vowel]
@@ -401,7 +423,9 @@ def process_initial_sound(syllable):
     for initial_sound_key in INITIAL_SOUNDS.keys():
         if syllable.initial_consonants[0].char in INITIAL_SOUNDS[initial_sound_key]:
             syllable.initial_sound = initial_sound_key
-            return
+
+def process_initial_class(syllable):
+    syllable.initial_class = syllable.initial_consonants_cluster[0].consonant_class
     
 def get_default_vowel(vowel_string):
     for vowel_forms_key in VOWEL_FORMS.keys():
@@ -412,7 +436,7 @@ def process_vowel(syllable):
     vowel_string = syllable.getVowelString()
     vowel_default = get_default_vowel(vowel_string)
     syllable.vowel_default = get_default_vowel(vowel_string)
-    print(vowel_default)
+    print(vowel_string)
     if vowel_default in SHORT_LONG_VOWEL_PAIRS.get_forward_keys():
         syllable.vowel_duration = 'short'
         syllable.vowel_short = vowel_default
@@ -453,11 +477,17 @@ def process_live_dead(syllable):
     elif syllable.final_sound in LIVE_FINAL_SOUNDS:
         syllable.live_dead = 'live'
 
-syllable = Syllable('เบว')
+def process_tone(syllable):
+    return
+
+# Implied a and oh
+
+syllable = Syllable('หน้า')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
 extract_roles(syllable)
 process_initial_sound(syllable)
+process_initial_class(syllable)
 process_final_sound(syllable)
 process_vowel(syllable)
 process_live_dead(syllable)
