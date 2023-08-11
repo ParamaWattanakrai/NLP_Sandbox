@@ -190,7 +190,13 @@ def find_initial_consonants_cluster(syllable, current_index, ee_initial, ay_init
             if potential_second_consonant.char == 'ย' and (ee_initial or ay_initial):
                 return [current_index, initial_consonants, w_vowel]
 
+            if potential_second_consonant.char == 'ร' or potential_second_consonant.char == 'ล':
+                if first_consonant.char not in R_L_BLENDING_INITIALS:
+                    return [current_index, initial_consonants, w_vowel]
+
             if potential_second_consonant.char == 'ว':
+                if first_consonant.char not in W_BLENDING_INITIALS:
+                    return [current_index, initial_consonants, w_vowel]
                 for chars in syllable.chars:
                     if chars.char in VOWELS:
                         initial_consonants.append(potential_second_consonant)
@@ -448,10 +454,7 @@ def process_live_dead(syllable):
     elif syllable.final_sound in LIVE_FINAL_SOUNDS:
         syllable.live_dead = 'live'
 
-
-# เบว broken
-
-syllable = Syllable('เขา')
+syllable = Syllable('เบว')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
 extract_roles(syllable)
