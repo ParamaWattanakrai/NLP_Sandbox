@@ -12,7 +12,7 @@ class Data():
     def getInformation(self):
         return f'Label: {self.label}\nOne Hot: {self.one_hot}\nIPA: {self.ipa}\nVector: {self.vector}'
 
-class DataLoader(Dataset):
+class DataLoader():
     def __init__(self):
         character_embedded = np.genfromtxt('ANN_embedding/everything.csv', delimiter=",", dtype='str', skip_header=1, encoding='utf-8')
         self.label = character_embedded[:, 0]
@@ -34,3 +34,8 @@ class DataLoader(Dataset):
 
         if selected_data is None:
             return f'No object found with label: {target_label}'
+
+# bruh = DataLoader()
+# print(bruh.searchData("์").getInformation())
+# bruh.searchData("์").vector = [0,1,0,2,5,2]
+# print(bruh.searchData("์").getInformation())
