@@ -52,12 +52,12 @@ def predict(input_line):
 category_lines_train, all_categories_train, category_lines_test, all_categories_test  = Loaddata()
 
 # hyperparameter
-n_input = 16
+n_input = 68
 n_hidden = 128
 n_categories = len(all_categories_train)
 batch_size = 1
 learning_rate = 0.005
-num_epochs = 30000
+num_epochs = 10000
 
 model = RNNModel(n_input, n_hidden, n_categories)
 

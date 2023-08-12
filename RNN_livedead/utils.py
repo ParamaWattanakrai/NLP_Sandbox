@@ -7,7 +7,7 @@ character_embeddings = {}
 dataset_dict = {}
 
 C_PATH = os.path.dirname(__file__)
-embedding_filepath = os.path.join(C_PATH, 'data/thai_character_embedding.csv')
+embedding_filepath = os.path.join(C_PATH, 'data/data_vectors68.csv')
 dataset_filepath = os.path.join(C_PATH, 'data/dataset.csv')
 
 with open(embedding_filepath, 'r', encoding='utf-8') as f:
@@ -47,7 +47,7 @@ def Loaddata(train_proportion=0.8):
     return category_lines_train, all_categories_train, category_lines_test, all_categories_test
 
 def Embedding(line):
-    embedding = torch.zeros(len(line), 1, 16)
+    embedding = torch.zeros(len(line), 1, 68)
     for i, character in enumerate(line):
         character_vector = character_embeddings.get(character)
         if character_vector is not None:
