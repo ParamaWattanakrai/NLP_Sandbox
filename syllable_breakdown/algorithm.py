@@ -520,7 +520,7 @@ def process_tone(syllable):
         print('rising')
     return
     
-syllable = Syllable('ค่า')
+syllable = Syllable('โกรธ')
 print(f'Syllable Length: {len(syllable.chars)}')
 extract_clusters(syllable)
 extract_roles(syllable)
