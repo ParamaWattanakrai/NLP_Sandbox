@@ -18,14 +18,18 @@ model = nn.Sequential(
 mseLoss = nn.MSELoss()
 optimizer = torch.optim.SGD(model.parameters(), lr=0.01)
 
+def weight_reset(model):
+    if isinstance(model, nn.Linear):
+        model.reset_parameters()
 
 csv_data = []
 
 for index, data_instance in enumerate(data_loader.list_of_data):
+    model.apply(weight_reset)
     input_layer = data_instance.one_hot.view(1, -1)
     output_layer = data_instance.ipa.view(1, -1)
     print(data_instance.label)
-    for epoch in range(10000):
+    for epoch in range(100000):
         predicted = model(input_layer)
         loss = mseLoss(predicted, output_layer)
         loss.backward()

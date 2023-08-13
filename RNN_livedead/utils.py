@@ -7,7 +7,7 @@ character_embeddings = {}
 dataset_dict = {}
 
 C_PATH = os.path.dirname(__file__)
-embedding_filepath = os.path.join(C_PATH, 'data/data_vectors68.csv')
+embedding_filepath = os.path.join(C_PATH, 'data/data_vectors100000x68re.csv')
 dataset_filepath = os.path.join(C_PATH, 'data/dataset.csv')
 
 with open(embedding_filepath, 'r', encoding='utf-8') as f:
@@ -22,7 +22,7 @@ with open(dataset_filepath, 'r', encoding='utf-8') as f:
         if idx >= 1:
             dataset_dict[row[0]] = row[1:]
 
-def Loaddata(train_proportion=0.8):
+def Loaddata(train_proportion=0.75):
     total_samples = len(dataset_dict)
     num_samples = int(train_proportion * total_samples)
     random_keys = list(dataset_dict.keys())

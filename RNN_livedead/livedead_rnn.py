@@ -19,7 +19,7 @@ class RNNModel(nn.Module):
         hidden1 = self.relu(self.hidden_layer1(combined)) 
         hidden2 = self.relu(self.hidden_layer(hidden1))
         output = self.softmax(self.output_layer(hidden2))
-        return output, hidden2 
+        return output, hidden2
     
     def init_hidden(self,batch_size):
         return torch.zeros(batch_size, self.hidden_size)

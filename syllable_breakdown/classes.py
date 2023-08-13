@@ -34,6 +34,7 @@ class ThaiCharacter():
     def getClass(self):
         if not self.consonant_class:
             return None
+    
     def getBefore(self, distance):
         distance += 1
         if len(self.before) < distance:
@@ -43,6 +44,16 @@ class ThaiCharacter():
         if len(self.after) <= distance:
             return None
         return self.after[distance]
+    def getBeforeChar(self, distance):
+        distance += 1
+        if len(self.before) < distance:
+            return None
+        return self.before[-distance].getChar()
+    def getAfterChar(self, distance):
+        if len(self.after) <= distance:
+            return None
+        return self.after[distance].getChar()
+    
     def selfCluster(self, cluster):
         return self.syllable.assignCluster(self, cluster)
     def selfRole(self, role):
