@@ -45,7 +45,7 @@ for index, data_instance in enumerate(data_loader.list_of_data):
 
     csv_data.append([data_instance.label] + data_instance.vector.tolist())
 
-csv_file = "data_vectors.csv"
+csv_file = 'ANN_embedding\data_vectors.csv'
 with open(csv_file, "w", newline="", encoding="utf-8") as file:
     writer = csv.writer(file)
     writer.writerows(csv_data)
