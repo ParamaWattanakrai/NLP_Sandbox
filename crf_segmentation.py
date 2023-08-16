@@ -242,6 +242,3 @@ for row in Y_before:
             else:
                 y_row.append('I')
     Y_train.append(y_row)
-
-for row in X_train:
-    print(row)

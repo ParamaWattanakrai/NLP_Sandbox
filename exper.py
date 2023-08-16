@@ -253,19 +253,6 @@ for row in y_before:
 
 X_train = X_train
 y_train = y_train
-
-# Sample training data
-# X_train = [
-#     [('I', 'PRON'), ('love', 'VERB'), ('to', 'PREP'), ('code', 'NOUN')],
-#     [('ChatGPT', 'NOUN'), ('is', 'VERB'), ('awesome', 'ADJ')],
-# ]
-
-# y_train = [
-#     ['PRP', 'V', 'P', 'N'],
-#     ['N', 'V', 'ADJ'],
-# ]
-
-# Create vocabulary and tagset
 word_to_idx = {'<PAD>': 0, '<UNK>': 1}
 tag_to_idx = {'<PAD>': 0}
 for sent_tags in y_train:
@@ -288,6 +275,10 @@ class CRFModel(nn.Module):
         x = self.embedding(x)
         emissions = self.linear(x)
         return emissions
+
+
+print(len(tag_to_idx))
+print(tag_to_idx)
 
 num_tags = len(tag_to_idx)
 model = CRFModel(num_tags, word_to_idx['<PAD>'])

@@ -18,14 +18,14 @@ y_train = [
 # Create vocabulary and tagset
 word_to_idx = {'<PAD>': 0, '<UNK>': 1}
 tag_to_idx = {'<PAD>': 0}
-for sent_tags in y_train:
+for sent_tags in Y_train:
     for tag in sent_tags:
         if tag not in tag_to_idx:
             tag_to_idx[tag] = len(tag_to_idx)
 
 # Convert words and tags to indices
 X_train_idx = [[word_to_idx.get(word, word_to_idx['<UNK>']) for word, _ in sent] for sent in X_train]
-y_train_idx = [[tag_to_idx[tag] for tag in sent_tags] for sent_tags in y_train] 
+y_train_idx = [[tag_to_idx[tag] for tag in sent_tags] for sent_tags in Y_train] 
 
 print(word_to_idx)
 print(tag_to_idx)
@@ -44,6 +44,8 @@ class CRFModel(nn.Module):
         emissions = self.linear(x)
         return emissions
 
+print(len(tag_to_idx))
+print(tag_to_idx)
 num_tags = len(tag_to_idx)
 model = CRFModel(num_tags, word_to_idx['<PAD>'])
 
