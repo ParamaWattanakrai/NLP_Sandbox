@@ -27,6 +27,11 @@ for sent_tags in y_train:
 X_train_idx = [[word_to_idx.get(word, word_to_idx['<UNK>']) for word, _ in sent] for sent in X_train]
 y_train_idx = [[tag_to_idx[tag] for tag in sent_tags] for sent_tags in y_train] 
 
+print(word_to_idx)
+print(tag_to_idx)
+print(X_train_idx)
+print(y_train_idx)
+
 class CRFModel(nn.Module):
     def __init__(self, num_tags, pad_idx):
         super(CRFModel, self).__init__()
@@ -48,7 +53,7 @@ criterion = model.crf
 optimizer = optim.Adam(model.parameters())
 
 # Training loop
-num_epochs = 10000
+num_epochs = 1000
 for epoch in range(num_epochs):
     model.train()
     total_loss = 0

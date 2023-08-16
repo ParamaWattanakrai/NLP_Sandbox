@@ -1,15 +1,16 @@
+from dict import *
+
 class ThaiCharacter():
-    def __init__(self, char, syllable, position, before=[], after=[], cluster='unknown', char_role='unknown'):
+    def __init__(self, char, syllable=None, position=None, before=[], after=[], cluster='unknown', char_role='unknown'):
         self.char = char
-        self.position = position
         self.syllable = syllable
+        self.position = position
         self.before = before
         self.after = after
         self.cluster = cluster
         self.role = char_role
-        for consonant_class_key in CONSONANT_CLASSES.keys():
-            if self.char in CONSONANT_CLASSES[consonant_class_key]:
-                self.consonant_class = consonant_class_key
+        
+        self.assignClass(self)
     def getInformation(self):
         chars_before = []
         chars_after = []
@@ -45,19 +46,23 @@ class ThaiCharacter():
             return None
         return self.after[distance]
     def getBeforeChar(self, distance):
-        distance += 1
-        if len(self.before) < distance:
+        if not self.getBefore(distance):
             return None
-        return self.before[-distance].getChar()
+        return self.getBefore(distance).getChar()
     def getAfterChar(self, distance):
-        if len(self.after) <= distance:
+        if not self.getAfter(distance):
             return None
-        return self.after[distance].getChar()
+        return self.getAfter[distance].getChar()
     
     def selfCluster(self, cluster):
         return self.syllable.assignCluster(self, cluster)
     def selfRole(self, role):
         return self.syllable.assignRole(self, role)
+
+    def assignClass(self):
+        for consonant_class_key in CONSONANT_CLASSES.keys():
+            if self.char in CONSONANT_CLASSES[consonant_class_key]:
+                self.consonant_class = consonant_class_key
 
 class Syllable:
     def __init__(self, string):
@@ -78,6 +83,8 @@ class Syllable:
         self.final_consonants = []
         self.silent_characters = []
 
+        self.true_blend = False
+
         self.initial_sound = ''
         self.initial_class = ''
         self.final_sound = ''
@@ -93,12 +100,9 @@ class Syllable:
         self.tone_mark = ''
         self.tone = ''
 
-        for index, char in enumerate(string):
-            thischar = Character(char, self, index)
-            self.chars.append(thischar)
-        for index, char in enumerate(self.chars):
-            char.before = self.chars[:index]
-            char.after = self.chars[index+1:]
+        appendThChars(self)
+        appendBeforeAfter(self)
+        
     def getInformation(self):
         initial_vowels = []
         initial_consonants = []
@@ -197,3 +201,15 @@ class Syllable:
         for char in self.getVowel():
             vowel_string = vowel_string + char.char
         return vowel_string
+    
+    def appendThChars(self):
+        for index, thchar in enumerate(string):
+            thisthchar = Character(thchar, self, index)
+            self.chars.append(thisthchar)
+    def appendBeforeAfter(self):
+        for index, thchar in enumerate(self.chars):
+            thchar.before = self.chars[:index]
+            thchar.after = self.chars[index+1:]
+
+a = ThaiCharacter('ก')
+print(a.getSyllable())
