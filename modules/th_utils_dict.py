@@ -1,207 +1,535 @@
-class BidirectionalDict:
-    def __init__(self):
-        self.forward_dict = {}
-        self.reverse_dict = {}
+# from classes import Character, Syllable
 
-    def __setitem__(self, key, value):
-        self.forward_dict[key] = value
-        self.reverse_dict[value] = key
+from .th_utils_dict import *
 
-    def __getitem__(self, key):
-        return self.forward_dict[key]
+class Character():
+    def __init__(self, char, syllable, position, before=[], after=[], cluster='unknown', char_role='unknown'):
+        self.char = char
+        self.position = position
+        self.syllable = syllable
+        self.before = before
+        self.after = after
+        self.cluster = cluster
+        self.role = char_role
+        for consonant_class_key in CONSONANT_CLASSES.keys():
+            if self.char in CONSONANT_CLASSES[consonant_class_key]:
+                self.consonant_class = consonant_class_key
+    def getInformation(self):
+        chars_before = []
+        chars_after = []
+        for char in self.before:
+            chars_before.append(char.char)
+        for char in self.after:
+            chars_after.append(char.char)
+        return f'''
+            Character: {self.char}
+            In Syllable: {self.syllable.string}
+            Position: {self.position}
+            Class: {self.consonant_class}
+            In Cluster: {self.cluster}
+            Role: {self.role}\nChracters Before: {chars_before}\nCharacters After: {chars_after}
+            '''
+    def getBefore(self, distance):
+        distance += 1
+        if len(self.before) < distance:
+            return None
+        return self.before[-distance]
+    def getAfter(self, distance):
+        if len(self.after) <= distance:
+            return None
+        return self.after[distance]
+    def selfCluster(self, cluster):
+        return self.syllable.assignCluster(self, cluster)
+    def selfRole(self, role):
+        return self.syllable.assignRole(self, role)
 
-    def reverse_get(self, value):
-        return self.reverse_dict[value]
+class Syllable:
+    def __init__(self, string):
+        self.string = string
+        self.chars = []
+        
+        self.initial_vowels_cluster = []
+        self.initial_consonants_cluster = []
+        self.tone_marks_cluster = []
+        self.final_vowels_cluster = []
+        self.final_consonants_cluster = []
 
-    def get_forward_keys(self):
-        return list(self.forward_dict.keys())
+        self.leading_consonants = []
+        self.initial_consonants = []
+        self.blending_consonants = []
+        self.vowels = []
+        self.tone_marks = []
+        self.final_consonants = []
+        self.silent_characters = []
 
-    def get_reverse_keys(self):
-        return list(self.reverse_dict.keys())
+        self.initial_sound = ''
+        self.initial_class = ''
+        self.final_sound = ''
 
-    def __str__(self):
-        return str(self.forward_dict)
+        self.vowel_default = ''
+        self.vowel_duration = ''
+        self.vowel_short = ''
+
+        self.vowel_long = ''
+        
+        self.live_dead = ''
+
+        self.tone_mark = ''
+        self.tone = ''
+
+        for index, char in enumerate(string):
+            thischar = Character(char, self, index)
+            self.chars.append(thischar)
+        for index, char in enumerate(self.chars):
+            char.before = self.chars[:index]
+            char.after = self.chars[index+1:]
+    def getInformation(self):
+        initial_vowels = []
+        initial_consonants = []
+        tone_marks = []
+        final_vowels = []
+        final_consonants = []
+        initial_vowels_roles = []
+
+        vowels = []
+
+        for char in self.initial_vowels_cluster:
+            initial_vowels.append([char.char, char.role])
+        for char in self.initial_consonants_cluster:
+            initial_consonants.append([char.char, char.role])
+        for char in self.tone_marks_cluster:
+            tone_marks.append([char.char, char.role])
+        for char in self.final_vowels_cluster:
+            final_vowels.append([char.char, char.role])
+        for char in self.final_consonants_cluster:
+            final_consonants.append([char.char, char.role])
+
+        for char in self.getVowel():
+            vowels.append(char.char)
+
+        information = f'''
+            Syllable String: {self.string}
+            Initial Vowels Cluster: {initial_vowels}
+            Initial Consonants Cluster: {initial_consonants}
+            Tone Marks Cluster: {tone_marks}
+            Final Vowels Cluster: {final_vowels}
+            Final Consonants Cluster: {final_consonants}
+
+            Initial Sound: {self.initial_sound}
+            Inital Class: {self.initial_class}
+            Final Sound: {self.final_sound}
+            
+            Vowel Form: {vowels}
+            Vowel Default Form: {self.vowel_default}
+            Vowel Duration: {self.vowel_duration}
+
+            Vowel Short Form: {self.vowel_short}
+            Vowel Long Form: {self.vowel_long}
+
+            Live/Dead: {self.live_dead}
+
+            Tone Mark: {self.tone_mark}
+            Tone: {self.tone}
+            '''
+        return information
+    def assignCluster(self, char, cluster):
+        if cluster == 'initial_vowels_cluster':
+            char.cluster = cluster
+            self.initial_vowels_cluster.append(char)
+        elif cluster == 'initial_consonants_cluster':
+            char.cluster = cluster
+            self.initial_consonants_cluster.append(char)
+        elif cluster == 'tone_marks_cluster':
+            char.cluster = cluster
+            self.tone_marks_cluster.append(char)
+        elif cluster == 'final_vowels_cluster':
+            char.cluster = cluster
+            self.final_vowels_cluster.append(char)
+        elif cluster == 'final_consonants_cluster':
+            char.cluster = cluster
+            self.final_consonants_cluster.append(char)
+        else:
+            return None
+    def assignRole(self, char, role):
+        if role == 'leading_consonant':
+            char.role = role
+            self.leading_consonants.append(char)
+        elif role == 'initial_consonant':
+            char.role = role
+            self.initial_consonants.append(char)    
+        elif role == 'blending_consonant':
+            char.role = role
+            self.blending_consonants.append(char)
+        elif role == 'vowel':
+            char.role = role
+            self.vowels.append(char)
+        elif role == 'tone_mark':
+            char.role = role
+            self.tone_marks.append(char)
+        elif role == 'final_consonant':
+            char.role = role
+            self.final_consonants.append(char)
+        elif role == 'silent_character':
+            char.role = role
+            self.silent_characters.append(char)
+        else:
+            return None
+    def getVowel(self):
+        return self.initial_vowels_cluster + self.final_vowels_cluster
+    def getVowelString(self):
+        vowel_string = ''
+        for char in self.getVowel():
+            vowel_string = vowel_string + char.char
+        return vowel_string
+
+def find_initial_vowels_cluster(syllable):
+    initial_vowels = []
+    current_index = 0
+    if syllable.chars[0].char in INITIAL_VOWELS:
+        initial_vowels = [syllable.chars[0]]
+        current_index += 1
+
+    return [current_index, initial_vowels]
+
+def find_initial_consonants_cluster(syllable, current_index, ee_initial, ay_initial):
+    w_vowel = False
+
+    first_consonant = syllable.chars[current_index]
+
+    initial_consonants = [first_consonant]
+    current_index += 1
+
+    if first_consonant.getAfter(0):
+        potential_second_consonant = first_consonant.getAfter(0)
+        if potential_second_consonant.char in CONSONANTS:
+
+            if potential_second_consonant.char == 'อ':
+                return [current_index, initial_consonants, w_vowel]
+            
+            if potential_second_consonant.char == 'ย' and (ee_initial or ay_initial):
+                return [current_index, initial_consonants, w_vowel]
+
+            if potential_second_consonant.char == 'ร' or potential_second_consonant.char == 'ล':
+                if first_consonant.char in R_L_BLENDING_INITIALS:
+                    initial_consonants.append(potential_second_consonant)
+                    current_index += 1
+                    return [current_index, initial_consonants, w_vowel]
+            
+            if potential_second_consonant.char == 'ว':
+                if first_consonant.char not in W_BLENDING_INITIALS:
+                    return [current_index, initial_consonants, w_vowel]
+                for chars in syllable.chars:
+                    if chars.char in VOWELS:
+                        initial_consonants.append(potential_second_consonant)
+                        current_index += 1
+                        return [current_index, initial_consonants, w_vowel]
+                w_vowel = True
+                return [current_index, initial_consonants, w_vowel]
+            
+            if potential_second_consonant.getAfter(0):
+                if potential_second_consonant.char == 'ร' and potential_second_consonant.getAfter(0).char == 'ร':
+                    return [current_index, initial_consonants, w_vowel]
+                if first_consonant.char == 'อ' and potential_second_consonant.char == 'ย' or \
+                    first_consonant.char == 'ห' and potential_second_consonant.char in UNPAIRED_LOW_CONSONANTS:
+                    initial_consonants.append(potential_second_consonant)
+                    current_index += 1
+                    return [current_index, initial_consonants, w_vowel]
+                if potential_second_consonant.char not in BLENDING_CONSONANTS:
+                    return [current_index, initial_consonants, w_vowel]
+                initial_consonants.append(potential_second_consonant)
+                current_index += 1
+                return [current_index, initial_consonants, w_vowel]
+            
+            return [current_index, initial_consonants, w_vowel]
+
+    return [current_index, initial_consonants, w_vowel]
+
+def find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initial, ay_initial, w_vowel):
+    final_vowels = []
+    tone_marks = []
+
+    if len(syllable.chars) <= current_index:
+        return [current_index, final_vowels, tone_marks]
+
+    def append_loop(first_index, final_index):
+        final_index += 1
+        for index in range(first_index, final_index):
+            if syllable.chars[index].char in TONE_MARKS:
+                tone_marks.append(syllable.chars[index])
+                continue
+            final_vowels.append(syllable.chars[index])
+        return final_index
+
+    for potential_a_index in range(current_index, len(syllable.chars)):
+        if syllable.chars[potential_a_index].char == 'ะ':
+            current_index = append_loop(current_index, potential_a_index)
+            return [current_index, final_vowels, tone_marks]
     
-SHORT_LONG_VOWEL_PAIRS = BidirectionalDict()
-SHORT_LONG_VOWEL_PAIRS['-ะ'] = '-า'
-SHORT_LONG_VOWEL_PAIRS['แ-ะ'] = 'แ-'
-SHORT_LONG_VOWEL_PAIRS['เ-าะ'] = '-อ'
-SHORT_LONG_VOWEL_PAIRS['เ-ะ'] = 'เ-'
-SHORT_LONG_VOWEL_PAIRS['เ-อะ'] = 'เ-อ'
-SHORT_LONG_VOWEL_PAIRS['โ-ะ'] = 'โ-'
-SHORT_LONG_VOWEL_PAIRS['-ิ'] = '-ี'
-SHORT_LONG_VOWEL_PAIRS['-ึ'] = '-ื'
-SHORT_LONG_VOWEL_PAIRS['-ุ'] = '-ู'
-SHORT_LONG_VOWEL_PAIRS['เ-ียะ'] = 'เ-ีย'
-SHORT_LONG_VOWEL_PAIRS['เ-ือะ'] = 'เ-ือ'
-SHORT_LONG_VOWEL_PAIRS['-ัวะ'] = '-ัว'
-SHORT_LONG_VOWEL_PAIRS['ไ-'] = '-าย'
-SHORT_LONG_VOWEL_PAIRS['-็อย'] = '-อย'
-SHORT_LONG_VOWEL_PAIRS['-'] = 'เ-ย'
-SHORT_LONG_VOWEL_PAIRS['-'] = 'โ-ย'
-SHORT_LONG_VOWEL_PAIRS['-ุย'] = ''
-SHORT_LONG_VOWEL_PAIRS['-'] = 'เ-ือย'
-SHORT_LONG_VOWEL_PAIRS['-'] = '-วย'
-SHORT_LONG_VOWEL_PAIRS['-'] = '-วาย'
-SHORT_LONG_VOWEL_PAIRS['เ-า'] = '-าว'
-SHORT_LONG_VOWEL_PAIRS['แ-็ว'] = 'แ-ว'
-SHORT_LONG_VOWEL_PAIRS['-'] = 'เ-อว'
-SHORT_LONG_VOWEL_PAIRS['เ-็ว'] = 'เ-ว'
-SHORT_LONG_VOWEL_PAIRS['-ิว'] = 'เ-ียว'
-SHORT_LONG_VOWEL_PAIRS['-ำ'] = ''
-SHORT_LONG_VOWEL_PAIRS['-ฤ'] = ''
+    for potential_oo_index in range(current_index, len(syllable.chars)):
+        if syllable.chars[potential_oo_index].char == 'อ':
+            current_index = append_loop(current_index, potential_oo_index)
+            return [current_index, final_vowels, tone_marks]
+    
+    for potential_y_index in range(current_index, len(syllable.chars)):
+        if syllable.chars[potential_y_index].char == 'ย':
+            y = syllable.chars[potential_y_index]
+            if ay_initial:
+                current_index = append_loop(current_index, potential_y_index)
+                return [current_index, final_vowels, tone_marks]
+            if ee_initial:
+                for potential_ii_index in range(current_index, potential_y_index):
+                    if syllable.chars[potential_ii_index].char == 'ี':
+                        current_index = append_loop(current_index, potential_y_index)
+                        return [current_index, final_vowels, tone_marks]
+                if y.getAfter(0):
+                    if y.getAfter(0).char == '์':
+                        break
+                current_index = append_loop(current_index, potential_y_index)
+                return [current_index, final_vowels, tone_marks]
 
-th_chars = {
-    'consonants': [
-        'ก', 'ข', 'ฃ', 'ค', 'ฅ', 'ฆ', 'ง', 'จ', 'ฉ', 'ช',
-        'ซ', 'ฌ', 'ญ', 'ฎ', 'ฏ', 'ฐ', 'ฑ', 'ฒ', 'ณ', 'ด',
-        'ต', 'ถ', 'ท', 'ธ', 'น', 'บ', 'ป', 'ผ', 'ฝ', 'พ',
-        'ฟ', 'ภ', 'ม', 'ย', 'ร', 'ฤ', 'ล', 'ฦ', 'ว', 'ศ',
-        'ษ', 'ส', 'ห', 'ฬ', 'อ', 'ฮ'
-        ],
-    'vowels': [
-        'ิ', 'ี', 'ึ', 'ื', 'ๅ', 'ุ', 'ู', 'เ', 'โ', 'แ',
-        'ะ', 'ั', 'า', 'ำ', 'ใ', 'ไ', '็'
-        ],
-    'tone_marks': ['่','้','๊','๋'],
+    after0_char = ''
+    if current_index + 1 < len(syllable.chars):
+        after0_char = syllable.chars[current_index].getAfter(0).char
 
-    'consonant_classes': {
-        'low': ['ง','ญ','ณ','น','ม','ย','ร','ฤ','ล','ฦ','ว','ฬ','ค','ฅ','ฆ','ช','ซ','ฌ','ฑ','ฒ','ท','ธ','พ','ฟ','ภ','ฮ'],
-        'high': ['ข','ฃ','ฉ','ฐ','ถ','ผ','ฝ','ศ','ษ','ส','ห'],
-        'mid': ['ก','จ','ฎ','ฏ','ด','ต','บ','ป','อ'],
-    },
+    after1_char = ''
+    if current_index + 2 < len(syllable.chars):
+        after1_char = syllable.chars[current_index].getAfter(1).char
 
-    'low_consonants': ['ง','ญ','ณ','น','ม','ย','ร','ฤ','ล','ฦ','ว','ฬ'],
-    'unpaired_low_consonants': ['ง','ญ','ณ','น','ม','ย','ร','ล','ว','ฬ'],
-    'paired_low_consonants': ['ค','ฅ','ฆ','ช','ซ','ฌ','ฑ','ฒ','ท','ธ','พ','ฟ','ภ','ฮ'],
-    'high_consonants': ['ข','ฃ','ฉ','ฐ','ถ','ผ','ฝ','ศ','ษ','ส','ห'],
-    'mid_consonants': ['ก','จ','ฎ','ฏ','ด','ต','บ','ป','อ'],
+    if syllable.chars[current_index].char == 'ฤ':
+        final_vowels.append(syllable.chars[current_index])
+        current_index += 1
+        return [current_index, final_vowels, tone_marks]
 
-    'leading_consonants': ['ห','อ'],
+    if syllable.chars[current_index].char == 'ร' and after0_char == 'ร':
+        final_vowels.append(syllable.chars[current_index])
+        final_vowels.append(syllable.chars[current_index].getAfter(0))
+        current_index += 2
+        return [current_index, final_vowels, tone_marks]
 
-    'blending_consonants': ['ย','ร','ล','ว'],
-    'r_l_blending_initials': ['ก','ข','ค','ต','ป','พ'],
-    'w_blending_initials': ['ก','ข','ค'],
+    if (syllable.chars[current_index].char in TONE_MARKS and after0_char == 'ว') or \
+        (syllable.chars[current_index].char == 'ั' and after0_char == 'ว') or \
+        (syllable.chars[current_index].char == 'ั' and after0_char in TONE_MARKS and after1_char == 'ว'):
+            w_vowel = True
 
-    'initial_vowels': ['แ', 'เ', 'โ', 'ไ', 'ใ'],
+    if w_vowel:
+        w_index = None
+        for potential_w_index in range(current_index, len(syllable.chars)):
+            if syllable.chars[potential_w_index].char == 'ว':
+                w_index = potential_w_index
+        current_index = append_loop(current_index, w_index)
+        return [current_index, final_vowels, tone_marks]
+    
+    if syllable.chars[current_index].char in TONE_MARKS and after0_char in VOWELS:
+        tone_marks.append(syllable.chars[current_index])
+        final_vowels.append(syllable.chars[current_index].getAfter(0))
+        current_index += 2
+        return [current_index, final_vowels, tone_marks]
+    
+    if syllable.chars[current_index].char in VOWELS:
+        final_vowels.append(syllable.chars[current_index])
+        current_index += 1
+        return [current_index, final_vowels, tone_marks]
+    
+    if syllable.chars[current_index].char in TONE_MARKS:
+        tone_marks.append(syllable.chars[current_index])
+        current_index += 1
+        return [current_index, final_vowels, tone_marks]
 
-    'initial_sounds': {
-        'ก': ['ก'],
-        'ค': ['ข','ฃ','ค','ฅ','ฆ'],
-        'ง': ['ง'],
-        'จ': ['จ'],
-        'ช': ['ฉ','ช','ฌ'],
-        'ซ': ['ซ','ศ','ษ','ส'],
-        'ย': ['ญ','ย'],
-        'ด': ['ฎ','ด'],
-        'ต': ['ฏ','ต'],
-        'ท': ['ฐ','ฑ','ฒ','ถ','ท','ธ'],
-        'น': ['ณ','น',],
-        'บ': ['บ'],
-        'ป': ['ป'],
-        'พ': ['ผ','พ','ภ'],
-        'ฟ': ['ฝ','ฟ'],
-        'ม': ['ม'],
-        'ร': ['ร','ฤ'],
-        'ล': ['ล','ฬ','ฦ'],
-        'ว': ['ว'],
-        'ฮ': ['ห','ฮ'],
-        'อ': ['อ']
-    },
+    return [current_index, final_vowels, tone_marks]
 
-    'final_sounds': {
-        'ก': ['ก','ข','ฃ','ค','ฅ','ฆ'],
-        'บ': ['บ','ป','ผ','ฝ','พ','ฟ','ภ'], #ฝ
-        'ด': ['จ','ฉ','ช','ฌ','ฎ','ฏ','ฐ','ฑ','ฒ','ด','ต','ถ','ท','ธ','ศ','ษ','ส'],
-        'น': ['ญ','ณ','น','ร','ล','ฬ'],
-        'ม': ['ม'],
-        'ย': ['ย'],
-        'ว': ['ว'],
-        'ง': ['ง'],
-    },
+def find_final_consonants_cluster(syllable, current_index):
+    return syllable.chars[current_index:]
 
-    'live_final_sounds': ['น','ม','ย','ว','ง'],
-    'dead_final_sounds': ['ก','บ','ด'],
+def extract_clusters(syllable):
+    ee_initial = False
+    ay_initial = False
 
-    'vowel_forms': {
-        '-ะ': ['ั', 'รร', 'ะ'],
-        '-า': ['า'],
-        'แ-ะ': ['แ็','แะ'],
-        'แ-': ['แ'],
-        'เ-าะ': ['็อ','เาะ'],
-        '-อ': ['อ'],
-        'เ-ะ': ['เ็','เะ'],
-        'เ-': ['เ'],
-        'เ-อะ': ['เอะ'], # เ-ิ
-        'เ-อ': ['เิ','เอ'],
-        'โ-ะ': ['โะ'],
-        'โ-': ['โ'],
-        '-ิ': ['ิ'],
-        '-ี': ['ี'],
-        '-ึ': ['ึ'],
-        '-ื': ['ิ','ิอ'],
-        '-ุ': ['ุ'],
-        '-ู': ['ู'],
+    initial_vowels_cluster_info = find_initial_vowels_cluster(syllable)
+    current_index = initial_vowels_cluster_info[0]
+    initial_vowels_cluster = initial_vowels_cluster_info[1]
 
-        'เ-ียะ': ['เียะ'],
-        'เ-ีย': ['เีย'],
-        'เ-ือะ': ['ือะ'],
-        'เ-ือ': ['เือ'],
-        '-ัวะ': ['ัวะ'],
-        '-ัว': ['ว','ัว'], # ะ ว
+    if initial_vowels_cluster:
+        if initial_vowels_cluster[0].char == 'เ':
+            ee_initial = True
+        if initial_vowels_cluster[0].char == 'ไ':
+            ay_initial = True
 
-        'ไ-': ['ไ','ใ','ไย'],
-        '-าย': ['าย'],
-        '-็อย': ['็ฮย'],
-        '-อย': ['อย'],
-        'เ-ย': ['เย'],
-        'โ-ย': ['โย'],
-        '-ุย': ['ุย'],
-        'เ-ือย': ['เือย'],
-        '-วย': ['วย'],
-        '-วาย': ['วาย'],
+    initial_consonants_cluster_info = find_initial_consonants_cluster(syllable, current_index, ee_initial, ay_initial)
+    current_index = initial_consonants_cluster_info[0]
+    initial_consonants_cluster = initial_consonants_cluster_info[1]
+    w_vowel = initial_consonants_cluster_info[2]
 
-        'เ-า': ['เา'],
-        '-าว': ['าว'],
-        'แ-็ว': ['แ็ว'],
-        'แ-ว': ['แว'],
-        'เ-อว': ['เอว'],
-        'เ-็ว': ['เ็ว'],
-        'เ-ว': ['เว'],
-        '-ิว': ['ิว'],
-        'เ-ียว': ['เียว'],
+    final_vowels_and_tone_marks_clusters_info = find_final_vowels_and_tone_marks_clusters(syllable, current_index, ee_initial, ay_initial, w_vowel)
+    current_index = final_vowels_and_tone_marks_clusters_info[0]
+    final_vowels_cluster = final_vowels_and_tone_marks_clusters_info[1]
+    tone_marks_cluster = final_vowels_and_tone_marks_clusters_info[2]
 
-        '-ำ': ['ำ'], #amam
-        '-ฤ': ['ฤ'],
-    },
-}
+    final_consonants_cluster = find_final_consonants_cluster(syllable, current_index)
 
+    for char in initial_vowels_cluster:
+        char.selfCluster('initial_vowels_cluster')
+    for char in initial_consonants_cluster:
+        char.selfCluster('initial_consonants_cluster')
+    for char in tone_marks_cluster:
+        char.selfCluster('tone_marks_cluster')
+    for char in final_vowels_cluster:
+        char.selfCluster('final_vowels_cluster')
+    for char in final_consonants_cluster:
+        char.selfCluster('final_consonants_cluster')
 
+def extract_initial_consonants_cluster(syllable):
+    initial_consonants_cluster = syllable.initial_consonants_cluster
 
-CONSONANTS = th_chars['consonants']
-VOWELS = th_chars['vowels']
-TONE_MARKS = th_chars['tone_marks']
+    if len(initial_consonants_cluster) == 1:
+        initial_consonants_cluster[0].selfRole('initial_consonant')
+        return
 
-CONSONANT_CLASSES = th_chars['consonant_classes']
+    if (initial_consonants_cluster[0].char == 'ห' or initial_consonants_cluster[0].char == 'อ') and \
+        initial_consonants_cluster[1].char in UNPAIRED_LOW_CONSONANTS:
+        initial_consonants_cluster[0].selfRole('leading_consonant')
+        initial_consonants_cluster[1].selfRole('initial_consonant')
+        return
+    
+    initial_consonants_cluster[0].selfRole('initial_consonant')
+    initial_consonants_cluster[1].selfRole('blending_consonant')
 
-LOW_CONSONANTS = th_chars['consonant_classes']['low']
-UNPAIRED_LOW_CONSONANTS = th_chars['unpaired_low_consonants']
-PAIRED_LOW_CONSONANTS = th_chars['paired_low_consonants']
-HIGH_CONSONANTS = th_chars['consonant_classes']['high']
-MID_CONSONANTS = th_chars['consonant_classes']['mid']
+def extract_final_consonants_cluster(syllable):
+    final_consonants_cluster = syllable.final_consonants_cluster
 
-LEADING_CONSONANTS = th_chars['leading_consonants']
+    if not final_consonants_cluster:
+        return
+    
+    if len(final_consonants_cluster) == 2 and final_consonants_cluster[-1].char == '์':
+        final_consonants_cluster[-1].selfRole('silent_character')
+        final_consonants_cluster[-2].selfRole('silent_character')
+        return
+    if len(final_consonants_cluster) == 2 and final_consonants_cluster[0].char == 'ร':
+        final_consonants_cluster[0].selfRole('silent_character')
+        final_consonants_cluster[1].selfRole('final_consonant')
+        return
+    
+    final_consonants_cluster[0].selfRole('final_consonant')
+    for char in final_consonants_cluster[1:]:
+        char.selfRole('silent_character')
 
-BLENDING_CONSONANTS = th_chars['blending_consonants']
-R_L_BLENDING_INITIALS = th_chars['r_l_blending_initials']
-W_BLENDING_INITIALS = th_chars['w_blending_initials']
+def extract_roles(syllable):
+    for char in syllable.initial_vowels_cluster + syllable.final_vowels_cluster:
+        char.selfRole('vowel')
+    for char in syllable.tone_marks_cluster:
+        char.selfRole('tone_mark')
+    extract_initial_consonants_cluster(syllable)
+    extract_final_consonants_cluster(syllable)
+    return
 
-INITIAL_VOWELS = th_chars['initial_vowels']
+def process_initial_sound(syllable):
+    for initial_sound_key in INITIAL_SOUNDS.keys():
+        if syllable.initial_consonants[0].char in INITIAL_SOUNDS[initial_sound_key]:
+            syllable.initial_sound = initial_sound_key
 
-INITIAL_SOUNDS = th_chars['initial_sounds']
-FINAL_SOUNDS = th_chars['final_sounds']
+def process_initial_class(syllable):
+    syllable.initial_class = syllable.initial_consonants_cluster[0].consonant_class
+    
+def get_default_vowel(vowel_string):
+    for vowel_forms_key in VOWEL_FORMS.keys():
+        if vowel_string in VOWEL_FORMS[vowel_forms_key]:
+            return vowel_forms_key
+    
+def process_vowel(syllable):
+    vowel_string = syllable.getVowelString()
+    if not vowel_string:
+        if not syllable.final_consonants:
+            syllable.vowel_default = '-ะ'
+        else:
+            syllable.vowel_default = 'โ-ะ'
+    else:
+        syllable.vowel_default = get_default_vowel(vowel_string)
 
-LIVE_FINAL_SOUNDS = th_chars['live_final_sounds']
-DEAD_FINAL_SOUNDS = th_chars['dead_final_sounds']
+    if syllable.vowel_default in SHORT_LONG_VOWEL_PAIRS.get_forward_keys():
+        syllable.vowel_duration = 'short'
+        syllable.vowel_short = syllable.vowel_default
+        syllable.vowel_long = SHORT_LONG_VOWEL_PAIRS[syllable.vowel_default]
+    else:
+        syllable.vowel_duration = 'long'
+        syllable.vowel_short = SHORT_LONG_VOWEL_PAIRS.reverse_get(syllable.vowel_default)
+        syllable.vowel_long = syllable.vowel_default
+    return
 
-VOWEL_FORMS = th_chars['vowel_forms']
+def process_final_sound(syllable):
+    final_sound = '-'
+    vowel_string = syllable.getVowelString()
+    if not vowel_string:
+        syllable.final_sound = final_sound
+        return
+    if not syllable.final_consonants:
+        if vowel_string[-1] == 'ำ':
+            final_sound = 'ม'
+        if vowel_string[0] == 'ไ' or vowel_string[0] == 'ใ':
+            final_sound = 'ย'
+        if vowel_string[0] == 'เ' and vowel_string[1] == 'า':
+            final_sound = 'ว'
+        syllable.final_sound = final_sound
+        return final_sound
+    for final_sound_key in FINAL_SOUNDS.keys():
+        if syllable.final_consonants[0].char in FINAL_SOUNDS[final_sound_key]:
+            final_sound = final_sound_key
+    syllable.final_sound = final_sound
+    return final_sound
+
+def process_live_dead(syllable):
+    if syllable.final_sound == '-':
+        if syllable.vowel_duration == 'short':
+            syllable.live_dead = 'dead'
+        if syllable.vowel_duration == 'long':
+            syllable.live_dead = 'live'
+        return
+    if syllable.final_sound in DEAD_FINAL_SOUNDS:
+        syllable.live_dead = 'dead'
+    elif syllable.final_sound in LIVE_FINAL_SOUNDS:
+        syllable.live_dead = 'live'
+
+def process_tone_mark(syllable):
+    if not syllable.tone_marks:
+        return
+    syllable.tone_mark = syllable.tone_marks[0].char
+
+def process_tone(syllable):
+    syllable.tone = 'uncalculable'
+    if ((syllable.initial_class == 'mid' or syllable.initial_class == 'low') and syllable.live_dead == 'live' and not syllable.tone_mark):
+        syllable.tone = 'mid'
+        print('mid')
+    if  ((syllable.initial_class == 'mid' or syllable.initial_class == 'high') and syllable.live_dead == 'live' and syllable.tone_mark == '่') or \
+        ((syllable.initial_class == 'mid' or syllable.initial_class == 'high') and syllable.live_dead == 'dead' and not syllable.tone_mark):
+        syllable.tone = 'low'
+        print('low')
+    if ((syllable.initial_class == 'mid' or syllable.initial_class == 'high') and syllable.tone_mark == '้') or \
+        (syllable.initial_class == 'low' and syllable.live_dead == 'live' and syllable.tone_mark == '่') or \
+        (syllable.initial_class == 'low' and syllable.live_dead == 'dead' and syllable.vowel_duration == 'short' and syllable.tone_mark == '่') or \
+        (syllable.initial_class == 'low' and syllable.live_dead == 'dead' and syllable.vowel_duration == 'long' and not syllable.tone_mark):
+        syllable.tone = 'falling'
+        print('falling')
+    if (syllable.initial_class == 'mid' and syllable.tone_mark == '๊') or \
+        (syllable.initial_class == 'low' and syllable.live_dead == 'live' and syllable.tone_mark == '้') or \
+        (syllable.initial_class == 'low' and syllable.live_dead == 'dead' and syllable.vowel_duration == 'long' and syllable.tone_mark == '้') or \
+        (syllable.initial_class == 'low' and syllable.live_dead == 'dead' and syllable.vowel_duration == 'short' and not syllable.tone_mark):
+        syllable.tone = 'high'
+        print('high')
+    if (syllable.initial_class == 'mid' and syllable.tone_mark == '๋') or \
+        (syllable.initial_class == 'low' and syllable.live_dead == 'dead' and syllable.tone_mark == '๋') or \
+        (syllable.initial_class == 'high' and syllable.live_dead == 'live' and not syllable.tone_mark):
+        syllable.tone = 'rising'
+        print('rising')
+    return
+
+def breakdown(string):
+    syllable = Syllable(string)
+    print(f'Syllable Length: {len(syllable.chars)}')
+    extract_clusters(syllable)
+    extract_roles(syllable)
+    process_initial_sound(syllable)
+    process_initial_class(syllable)
+    process_final_sound(syllable)
+    process_vowel(syllable)
+    process_live_dead(syllable)
+    process_tone_mark(syllable)
+    process_tone(syllable)
+    return syllable.getInformation()
