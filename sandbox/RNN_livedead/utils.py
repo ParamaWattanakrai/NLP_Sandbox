@@ -7,7 +7,7 @@ character_embeddings = {}
 dataset_dict = {}
 
 C_PATH = os.path.dirname(__file__)
-embedding_filepath = os.path.join(C_PATH, 'data/data_vectors100000x68re.csv')
+embedding_filepath = os.path.join(C_PATH, 'data/onehot68_copy.csv')
 dataset_filepath = os.path.join(C_PATH, 'data/dataset.csv')
 
 with open(embedding_filepath, 'r', encoding='utf-8') as f:
