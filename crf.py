@@ -4,8 +4,8 @@ import torch.optim as optim
 from crf_segmentation import X_train, Y_train, Y_before
 from torchcrf import CRF
 
-char_to_idx = {'<PAD>': 0, '<UNK>': 1}
-tag_to_idx = {'<PAD>': 0}
+char_to_idx = {'<UNK>': 1}
+tag_to_idx = {}
 for sent_tags in Y_train:
     for tag in sent_tags:
         if tag not in tag_to_idx:

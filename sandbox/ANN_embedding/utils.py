@@ -14,7 +14,7 @@ class Data():
 
 class DataLoader():
     def __init__(self):
-        character_embedded = np.genfromtxt('ANN_embedding/everything.csv', delimiter=",", dtype='str', skip_header=1, encoding='utf-8')
+        character_embedded = np.genfromtxt('sandbox/ANN_embedding/everything.csv', delimiter=",", dtype='str', skip_header=1, encoding='utf-8')
         self.label = character_embedded[:, 0]
         self.one_hot = torch.from_numpy(character_embedded[:, 2:70].astype(np.float32))
         self.ipa = torch.from_numpy(character_embedded[:, 70:86].astype(np.float32))
