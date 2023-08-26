@@ -23,8 +23,8 @@ print(Y_train_idx)
 class CRFModel(nn.Module):
     def __init__(self, num_tags):
         super(CRFModel, self).__init__()
-        self.embedding = nn.Embedding(len(char_to_idx), 128)
-        self.linear = nn.Linear(128, num_tags)
+        self.embedding = nn.Embedding(len(char_to_idx), 50)
+        self.linear = nn.Linear(50, num_tags)
         self.crf = CRF(num_tags, batch_first=True)
     
     def forward(self, x):
@@ -36,9 +36,9 @@ num_tags = len(tag_to_idx)
 model = CRFModel(num_tags)
 
 criterion = model.crf
-optimizer = optim.SGD(model.parameters(), lr = 0.001)
+optimizer = optim.SGD(model.parameters(), lr = 0.01)
 
-num_epochs = 10
+num_epochs = 1000
 for epoch in range(num_epochs):
     model.train()
     total_loss = 0
