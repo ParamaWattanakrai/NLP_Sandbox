@@ -1,6 +1,6 @@
 # from classes import Character, Syllable
 
-from th_utils_dict import *
+from .th_utils_dict import *
 
 class Character():
     def __init__(self, char, syllable, position, before=[], after=[], cluster='unknown', char_role='unknown'):
@@ -496,39 +496,35 @@ def process_tone(syllable):
     syllable.tone = 'uncalculable'
     if ((syllable.initial_class == 'mid' or syllable.initial_class == 'low') and syllable.live_dead == 'live' and not syllable.tone_mark):
         syllable.tone = 'mid'
-        print('mid')
     if  ((syllable.initial_class == 'mid' or syllable.initial_class == 'high') and syllable.live_dead == 'live' and syllable.tone_mark == '่') or \
         ((syllable.initial_class == 'mid' or syllable.initial_class == 'high') and syllable.live_dead == 'dead' and not syllable.tone_mark):
         syllable.tone = 'low'
-        print('low')
     if ((syllable.initial_class == 'mid' or syllable.initial_class == 'high') and syllable.tone_mark == '้') or \
         (syllable.initial_class == 'low' and syllable.live_dead == 'live' and syllable.tone_mark == '่') or \
         (syllable.initial_class == 'low' and syllable.live_dead == 'dead' and syllable.vowel_duration == 'short' and syllable.tone_mark == '่') or \
         (syllable.initial_class == 'low' and syllable.live_dead == 'dead' and syllable.vowel_duration == 'long' and not syllable.tone_mark):
         syllable.tone = 'falling'
-        print('falling')
     if (syllable.initial_class == 'mid' and syllable.tone_mark == '๊') or \
         (syllable.initial_class == 'low' and syllable.live_dead == 'live' and syllable.tone_mark == '้') or \
         (syllable.initial_class == 'low' and syllable.live_dead == 'dead' and syllable.vowel_duration == 'long' and syllable.tone_mark == '้') or \
         (syllable.initial_class == 'low' and syllable.live_dead == 'dead' and syllable.vowel_duration == 'short' and not syllable.tone_mark):
         syllable.tone = 'high'
-        print('high')
     if (syllable.initial_class == 'mid' and syllable.tone_mark == '๋') or \
         (syllable.initial_class == 'low' and syllable.live_dead == 'dead' and syllable.tone_mark == '๋') or \
         (syllable.initial_class == 'high' and syllable.live_dead == 'live' and not syllable.tone_mark):
         syllable.tone = 'rising'
-        print('rising')
     return
-    
-syllable = Syllable('โกรธ')
-print(f'Syllable Length: {len(syllable.chars)}')
-extract_clusters(syllable)
-extract_roles(syllable)
-process_initial_sound(syllable)
-process_initial_class(syllable)
-process_final_sound(syllable)
-process_vowel(syllable)
-process_live_dead(syllable)
-process_tone_mark(syllable)
-process_tone(syllable)
-print(syllable.getInformation())
+
+def breakdown(string):
+    syllable = Syllable(string)
+    print(f'Syllable Length: {len(syllable.chars)}')
+    extract_clusters(syllable)
+    extract_roles(syllable)
+    process_initial_sound(syllable)
+    process_initial_class(syllable)
+    process_final_sound(syllable)
+    process_vowel(syllable)
+    process_live_dead(syllable)
+    process_tone_mark(syllable)
+    process_tone(syllable)
+    return syllable
