@@ -6,7 +6,7 @@ import csv
 data_loader = DataLoader()
 
 input_size = 68
-hidden_size = 2
+hidden_size = 68
 output_size = 16
 
 model = nn.Sequential(
