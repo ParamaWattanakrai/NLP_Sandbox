@@ -38,7 +38,7 @@ model = CRFModel(num_tags)
 criterion = model.crf
 optimizer = optim.SGD(model.parameters(), lr = 0.001)
 
-num_epochs = 50
+num_epochs = 10
 for epoch in range(num_epochs):
     model.train()
     total_loss = 0
@@ -60,9 +60,13 @@ for epoch in range(num_epochs):
 
 while True:
     input_sentence = input("Enter a sentence: ").split()
-
-    input_sentence_idx = [char_to_idx.get(word, char_to_idx['<UNK>']) for word in input_sentence]
+    print(input_sentence)
+    input_word = [(char)for char in input_sentence[0]]
+    print(input_word)
+    input_sentence_idx = [char_to_idx.get(word, char_to_idx['<UNK>']) for word in input_word]
+    print(input_sentence_idx)
     input_tensor = torch.tensor(input_sentence_idx).unsqueeze(0)
+    print(input_tensor)
 
     model.eval()
 
@@ -72,6 +76,7 @@ while True:
     with torch.no_grad():
         predicted_tags = model.crf.decode(emissions)
 
+    print(predicted_tags)
     predicted_tags = [list(tag_to_idx.keys())[idx] for idx in predicted_tags[0]]
     print("Input Sentence:", " ".join(input_sentence))
     print("Predicted Tags:", " ".join(predicted_tags))
