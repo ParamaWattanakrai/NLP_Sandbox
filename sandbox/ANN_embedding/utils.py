@@ -14,14 +14,16 @@ class Data():
 
 class DataLoader():
     def __init__(self):
-        character_embedded = np.genfromtxt('sandbox/ANN_embedding/everything.csv', delimiter=",", dtype='str', skip_header=1, encoding='utf-8')
+        character_embedded = np.genfromtxt('sandbox/ANN_embedding/character_embedded.csv', delimiter=",", dtype='str', skip_header=1, encoding='utf-8')
+        data_vectors = np.genfromtxt('sandbox/ANN_embedding/data_vectors.csv', delimiter=",", dtype='str', encoding='utf-8')
+
         self.label = character_embedded[:, 0]
         self.one_hot = torch.from_numpy(character_embedded[:, 2:70].astype(np.float32))
         self.ipa = torch.from_numpy(character_embedded[:, 70:86].astype(np.float32))
+        self.vector = torch.from_numpy(data_vectors[:, 1:].astype(np.float32))
         self.list_of_data = []
-        self.vector = None
         for index, char in enumerate(self.label):
-            self.list_of_data.append(Data(self.label[index], self.one_hot[index], self.ipa[index], self.vector))
+            self.list_of_data.append(Data(self.label[index], self.one_hot[index], self.ipa[index], self.vector[index]))
     
     def searchData(self, label):
         target_label = label
@@ -35,7 +37,11 @@ class DataLoader():
         if selected_data is None:
             return f'No object found with label: {target_label}'
 
-# bruh = DataLoader()
-# print(bruh.searchData("์").getInformation())
-# bruh.searchData("์").vector = [0,1,0,2,5,2]
-# print(bruh.searchData("์").getInformation())
+if __name__ == '__main__':
+    data = DataLoader()
+
+    while True:
+        sentence = input("\n>>> ")
+        for char in sentence: 
+            print(char)
+            print(data.searchData(char).getInformation())
