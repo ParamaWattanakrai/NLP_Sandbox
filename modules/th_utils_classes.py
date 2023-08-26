@@ -274,5 +274,7 @@ class ThaiSyllable:
             string = string + thchar.getChar()
         return string
 
+
+
 a = ThaiSyllable('การ')
-print(a.getInitialConsonantsClusterString())
+print(a.syllable_string)
