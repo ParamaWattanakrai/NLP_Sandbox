@@ -273,8 +273,3 @@ class ThaiSyllable:
         for thchar in self.getVowel():
             string = string + thchar.getChar()
         return string
-
-
-
-a = ThaiSyllable('การ')
-print(a.syllable_string)
