@@ -16,6 +16,7 @@ Y_train_idx = [[tag_to_idx[tag] for tag in word_tags] for word_tags in Y_train]
 
 print(char_to_idx)
 print(tag_to_idx)
+
 print(X_train_idx)
 print(Y_train_idx)
 
@@ -35,9 +36,9 @@ num_tags = len(tag_to_idx)
 model = CRFModel(num_tags)
 
 criterion = model.crf
-optimizer = optim.Adam(model.parameters())
+optimizer = optim.SGD(model.parameters(), lr = 0.001)
 
-num_epochs = 1000
+num_epochs = 50
 for epoch in range(num_epochs):
     model.train()
     total_loss = 0
@@ -48,13 +49,6 @@ for epoch in range(num_epochs):
         
         optimizer.zero_grad()
         outputs = model(inputs)
-        print(outputs.shape)
-        print(inputs.shape)
-        print(targets.shape)
-        
-        if outputs.size(1) != targets.size(1):
-            targets = targets[:, :outputs.size(1)]
-        
         loss = -criterion(outputs, targets)
         loss.backward()
         optimizer.step()
@@ -63,3 +57,21 @@ for epoch in range(num_epochs):
     
     avg_loss = total_loss / len(X_train_idx)
     print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {avg_loss:.4f}")
+
+while True:
+    input_sentence = input("Enter a sentence: ").split()
+
+    input_sentence_idx = [char_to_idx.get(word, char_to_idx['<UNK>']) for word in input_sentence]
+    input_tensor = torch.tensor(input_sentence_idx).unsqueeze(0)
+
+    model.eval()
+
+    with torch.no_grad():
+        emissions = model(input_tensor)
+
+    with torch.no_grad():
+        predicted_tags = model.crf.decode(emissions)
+
+    predicted_tags = [list(tag_to_idx.keys())[idx] for idx in predicted_tags[0]]
+    print("Input Sentence:", " ".join(input_sentence))
+    print("Predicted Tags:", " ".join(predicted_tags))
