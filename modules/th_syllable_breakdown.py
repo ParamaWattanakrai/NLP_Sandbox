@@ -1,95 +1,100 @@
 import re
 
+from th_utils_classes import *
 from th_utils_regex import *
-
-print(000,T)
 
 pattern = f'เ[{C}]([{C}]|)ี([{T}]|)ยะ'
 
-text = "เกลี้ยะ"
+syllable = ThaiSyllable("มึน")
+syllable_string = syllable.syllable_string
+print(syllable_string)
 
-if re.search(f'[{C}]ึ', text):
-    print(text)
-if re.search(f'[{C}]ุ', text):
-    print(text)
-if re.search(f'[{C}]ู', text):
-    print(text)
-if re.search(f'[{C}]รร', text):
-    print(text)
-if re.search(f'[{C}]([{T}]|)ำ', text):
-    print(text)
-if re.search(f'[{C}]ฤ', text):
-    print(text)
+if re.search(f'[{C}]ึ', syllable_string):
+    syllable.vowel_default = '-ึ'
+    for thchar in syllable.getChar:
+        thchar.selfRole('initial_consonant')
+        
+    print(syllable.vowel_default)
+elif re.search(f'[{C}]ุ', syllable_string):
+    print(syllable_string)
+elif re.search(f'[{C}]ู', syllable_string):
+    print(syllable_string)
+elif re.search(f'[{C}]รร', syllable_string):
+    print(syllable_string)
+elif re.search(f'[{C}]([{T}]|)ำ', syllable_string):
+    print(syllable_string)
+elif re.search(f'[{C}]ฤ', syllable_string):
+    print(syllable_string)
 
-if re.search(f'แ[{C}]([{C}]|)็([{T}]|)[{C}]', text):
-    print(text)
-if re.search(f'แ[{C}]([{C}]|)([{T}]|)ะ', text):
-    print(text)
-if re.search(f'แ[{C}]', text):
-    print(text)
+elif re.search(f'แ[{C}]([{C}]|)็([{T}]|)[{C}]', syllable_string):
+    print(syllable_string)
+elif re.search(f'แ[{C}]([{C}]|)([{T}]|)ะ', syllable_string):
+    print(syllable_string)
+elif re.search(f'แ[{C}]', syllable_string):
+    print(syllable_string)
 
-if re.search(f'เ[{C}]([{C}]|)ี([{T}]|)ยะ', text):
-    print(text)
-if re.search(f'เ[{C}]([{C}]|)ี([{T}]|)ยะ', text):
-    print(text)
-if re.search(f'เ[{C}]([{C}]|)ื([{T}]|)อะ', text):
-    print(text)
-if re.search(f'เ[{C}]([{C}]|)([{T}]|)อะ', text):
-    print(text)
-if re.search(f'เ[{C}]([{C}]|)([{T}]|)าะ', text):
-    print(text)
-if re.search(f'เ[{C}]([{C}]|)([{T}]|)ะ', text):
-    print(text)
-if re.search(f'เ[{C}]([{C}]|)ื([{T}]|)อ', text):
-    print(text)
-if re.search(f'เ[{C}]([{C}]|)([{T}]|)อ', text):
-    print(text)
-if re.search(f'เ[{C}]([{C}]|)ิ([{T}]|)[{C}]', text):
-    print(text)
-if re.search(f'เ[{C}]', text):
-    print(text)
-if re.search(f'[{C}]([{T}]|)า', text):
-    print(text)
-if re.search(f'[{C}]ิ', text):
-    print(text)
-if re.search(f'[{C}]ี', text):
-    print(text)
+elif re.search(f'เ[{C}]([{C}]|)ี([{T}]|)ยะ', syllable_string):
+    print(syllable_string)
+elif re.search(f'เ[{C}]([{C}]|)ี([{T}]|)ยะ', syllable_string):
+    print(syllable_string)
+elif re.search(f'เ[{C}]([{C}]|)ื([{T}]|)อะ', syllable_string):
+    print(syllable_string)
+elif re.search(f'เ[{C}]([{C}]|)([{T}]|)อะ', syllable_string):
+    print(syllable_string)
+elif re.search(f'เ[{C}]([{C}]|)([{T}]|)าะ', syllable_string):
+    print(syllable_string)
+elif re.search(f'เ[{C}]([{C}]|)([{T}]|)ะ', syllable_string):
+    print(syllable_string)
+elif re.search(f'เ[{C}]([{C}]|)ื([{T}]|)อ', syllable_string):
+    print(syllable_string)
+elif re.search(f'เ[{C}]([{C}]|)([{T}]|)อ', syllable_string):
+    print(syllable_string)
+elif re.search(f'เ[{C}]([{C}]|)ิ([{T}]|)[{C}]', syllable_string):
+    print(syllable_string)
+elif re.search(f'เ[{C}]', syllable_string):
+    print(syllable_string)
+elif re.search(f'[{C}]([{T}]|)า', syllable_string):
+    print(syllable_string)
+elif re.search(f'[{C}]ิ', syllable_string):
+    print(syllable_string)
+elif re.search(f'[{C}]ี', syllable_string):
+    print(syllable_string)
 
-if re.search(f'[{C}]([{C}]|)ื([{T}]|)อ', text):
-    print(text)
-if re.search(f'[{C}]ื([{T}]|)[{C}]', text):
-    print(text)
+elif re.search(f'[{C}]([{C}]|)ื([{T}]|)อ', syllable_string):
+    print(syllable_string)
+elif re.search(f'[{C}]ื([{T}]|)[{C}]', syllable_string):
+    print(syllable_string)
 
-if re.search(f'โ[{C}]([{C}]|)([{T}]|)ะ', text):
-    print(text)
-if re.search(f'โ[{C}]', text):
-    print(text)
+elif re.search(f'โ[{C}]([{C}]|)([{T}]|)ะ', syllable_string):
+    print(syllable_string)
+elif re.search(f'โ[{C}]', syllable_string):
+    print(syllable_string)
 
-if re.search(f'ไ[{C}]ย', text):
-    print(text)
-if re.search(f'ไ[{C}]', text):
-    print(text)
-if re.search(f'ใ[{C}]', text):
-    print(text)
+elif re.search(f'ไ[{C}]ย', syllable_string):
+    print(syllable_string)
+elif re.search(f'ไ[{C}]', syllable_string):
+    print(syllable_string)
+elif re.search(f'ใ[{C}]', syllable_string):
+    print(syllable_string)
 
-if re.search(f'[{C}]ั([{T}]|)วะ', text):
-    print(text)
-if re.search(f'[{C}]ั([{T}]|)ว', text):
-    print(text)
-if re.search(f'[{C}]ั([{T}]|)[{C}]', text):
-    print(text)
-if re.search(f'[{C}]([{T}]|)ะ', text):
-    print(text)
+elif re.search(f'[{C}]ั([{T}]|)วะ', syllable_string):
+    print(syllable_string)
+elif re.search(f'[{C}]ั([{T}]|)ว', syllable_string):
+    print(syllable_string)
+elif re.search(f'[{C}]ั([{T}]|)[{C}]', syllable_string):
+    print(syllable_string)
+elif re.search(f'[{C}]([{T}]|)ะ', syllable_string):
+    print(syllable_string)
 
-if re.search(f'[{C}]็อ[{C}]', text):
-    print(text)
-if re.search(f'[{C}]([{T}]|)อ', text):
-    print(text)
+elif re.search(f'[{C}]็อ[{C}]', syllable_string):
+    print(syllable_string)
+elif re.search(f'[{C}]([{T}]|)อ', syllable_string):
+    print(syllable_string)
 
-if re.search(f'[{C}]([{T}]|)ว[{C}]', text):
-    print(text)
+elif re.search(f'[{C}]([{T}]|)ว[{C}]', syllable_string):
+    print(syllable_string)
 
-if re.search(f'[{C}][{C}]', text):
-    print(text)
+elif re.search(f'[{C}][{C}]', syllable_string):
+    print(syllable_string)
 
     
