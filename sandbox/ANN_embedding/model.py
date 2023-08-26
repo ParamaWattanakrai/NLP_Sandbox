@@ -24,19 +24,19 @@ def weight_reset(model):
 
 csv_data = []
 
-for index, data_instance in enumerate(data_loader.list_of_data):
+for epoch in range(100000):
     model.apply(weight_reset)
     input_layer = data_instance.one_hot.view(1, -1)
     output_layer = data_instance.ipa.view(1, -1)
     print(data_instance.label)
-    for epoch in range(100000):
+    for index, data_instance in enumerate(data_loader.list_of_data):
         predicted = model(input_layer)
         loss = mseLoss(predicted, output_layer)
         loss.backward()
         optimizer.step()
         optimizer.zero_grad()
-        if (epoch+1) % 5000 == 0:
-            print(f'epoch: {epoch + 1}, loss = {loss.item():.5f}')
+    if (epoch+1) % 5000 == 0:
+        print(f'epoch: {epoch + 1}, loss = {loss.item():.5f}')
     
     data_instance.vector = model[0].weight[:, index]
     print(predicted)
