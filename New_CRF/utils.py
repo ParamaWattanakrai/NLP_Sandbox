@@ -11,9 +11,6 @@ class Data():
     
     def getInformation(self):
         return f'Label: {self.label}\nOne Hot: {self.one_hot}\nIPA: {self.ipa}\nVector: {self.vector}'
-    def getVector(self):
-        return self.vector
-
 
 class DataLoader():
     def __init__(self):
@@ -40,11 +37,19 @@ class DataLoader():
         if selected_data is None:
             return f'No object found with label: {target_label}'
 
-if __name__ == '__main__':
-    data = DataLoader()
+def embed(type, word, data):
+    list_of_vector = []
+    for char in word:
+        if type == "one_hot":
+            list_of_vector.append(data.searchData(char).one_hot)
+        if type == "ipa":
+            list_of_vector.append(data.searchData(char).vector)
+    return list_of_vector
 
-    while True:
-        sentence = input("\n>>> ")
-        for char in sentence: 
-            print(char)
-            print(data.searchData(char).getVector())
+# -----------------------------Trial-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# if __name__ == '__main__':
+#     data = DataLoader()
+
+#     while True:
+#         sentence = input("\n>>> ")
+#         print(embed("one_hot", sentence, data))
