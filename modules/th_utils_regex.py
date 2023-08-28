@@ -192,6 +192,8 @@ for char in th_chars['tone_marks']:
     string = string + char
 T = string
 
+TONE_MARKS = th_chars['tone_marks']
+
 CONSONANT_CLASSES = th_chars['consonant_classes']
 
 LOW_CONSONANTS = th_chars['consonant_classes']['low']

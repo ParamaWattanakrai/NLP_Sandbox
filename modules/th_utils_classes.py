@@ -103,9 +103,9 @@ class ThaiSyllable:
         self.appendBeforeAfter()
         
     def appendThChars(self):
-        for index, thchar in enumerate(self.thchars):
-            thisthchar = ThaiCharacter(thchar, self, index)
-            self.thchars.append(thisthchar)
+        for index, char in enumerate(self.syllable_string):
+            thchar = ThaiCharacter(char, self, index)
+            self.thchars.append(thchar)
     def appendBeforeAfter(self):
         for index, thchar in enumerate(self.thchars):
             thchar.before = self.thchars[:index]
