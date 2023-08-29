@@ -16,7 +16,6 @@ def process_cluster(syllable, init_vowel_char='', vert_vowel_char='', fin_vowel_
     vert_vowel_index = len(syllable.thchars) + 1
     fin_vowel_indexes = [len(syllable.thchars) + 1]
     for thchar in syllable.thchars:
-        print(thchar.char)
         if init_vowel_char:
             if thchar.char == init_vowel_char:
                 thchar.selfCluster('initial_vowels_cluster')
