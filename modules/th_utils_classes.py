@@ -52,7 +52,7 @@ class ThaiCharacter():
     def getAfterChar(self, distance):
         if not self.getAfter(distance):
             return None
-        return self.getAfter[distance].getChar()
+        return self.getAfter(distance).getChar()
     
     def selfCluster(self, cluster):
         return self.syllable.assignCluster(self, cluster)
