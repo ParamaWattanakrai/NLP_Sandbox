@@ -8,7 +8,6 @@ pattern = f'เ[{C}]([{C}]|)ี([{T}]|)ยะ'
 syllable = ThaiSyllable("เยีย")
 syllable_string = syllable.syllable_string
 print(syllable_string)
-print(syllable.thchars)
 
 #Final Con Shenanigans not supported เลย์
 def process_cluster(syllable, init_vowel_char='', vert_vowel_char='', fin_vowel_chars='', has_tone=True):
@@ -50,6 +49,12 @@ def process_cluster(syllable, init_vowel_char='', vert_vowel_char='', fin_vowel_
             continue
         if i > fin_vowel_indexes[-1]:
             thchar.selfCluster('final_consonants_cluster')
+
+def process_roles(syllable):
+    print(syllable.getFinalVowelsClusterString())
+    for char in syllable.getInitialVowelsClusterList() + syllable.getFinalVowelsClusterList():
+        char.selfRole('vowel')
+    
 
 if re.search(f'[{C}]ึ', syllable_string):
     syllable.vowel_default = '-ึ'
@@ -142,5 +147,11 @@ elif re.search(f'[{C}]([{T}]|)ว[{C}]', syllable_string):
 elif re.search(f'[{C}][{C}]', syllable_string):
     print('implied oh')
 
+process_roles(syllable)
+
+
 for thchar in syllable.thchars:
     print(thchar.cluster)
+
+for thchar in syllable.thchars:
+    print(thchar.role)

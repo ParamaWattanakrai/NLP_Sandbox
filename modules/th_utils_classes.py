@@ -160,6 +160,27 @@ class ThaiSyllable:
             Tone: {self.tone}
             '''
         return information
+    def updateCluster(self):
+        if self.getInitialVowelsClusterList():
+            for thchar in self.getInitialVowelsClusterList():
+                if thchar.cluster != 'initial_vowels_cluster':
+                    self.initial_vowels_cluster.remove(thchar)
+        if self.getInitialConsonantsClusterList():
+            for thchar in self.getInitialConsonantsClusterList():
+                if thchar.cluster != 'initial_consonants_cluster':
+                    self.initial_consonants_cluster.remove(thchar)
+        if self.getFinalVowelsClusterList():
+            for thchar in self.getFinalVowelsClusterList():
+                if thchar.cluster != 'final_vowels_cluster':
+                    self.final_vowels_cluster.remove(thchar)
+        if self.getToneMarksClusterList():
+            for thchar in self.getToneMarksClusterList():
+                if thchar.cluster != 'tone_marks_cluster':
+                    self.tone_marks_cluster.remove(thchar)
+        if self.getFinalConsonantsClusterList():
+            for thchar in self.getFinalConsonantsClusterList():
+                if thchar.cluster != 'final_consonants_cluster':
+                    self.final_consonants_cluster.remove(thchar)
     def assignCluster(self, char, cluster):
         if cluster == 'initial_vowels_cluster':
             char.cluster = cluster
@@ -178,6 +199,7 @@ class ThaiSyllable:
             self.final_consonants_cluster.append(char)
         else:
             return None
+        self.updateCluster()
     def assignRole(self, char, role):
         if role == 'leading_consonant':
             char.role = role
