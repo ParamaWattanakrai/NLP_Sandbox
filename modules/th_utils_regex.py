@@ -80,7 +80,8 @@ th_chars = {
     'leading_consonants': ['ห','อ'],
 
     'blending_consonants': ['ย','ร','ล','ว'],
-    'r_l_blending_initials': ['ก','ข','ค','ต','ป','พ'],
+    'r_blending_initials': ['ก','ข','ค','ต','ป','พ'],
+    'l_blending_initials': ['ก','ข','ค','ป','พ','ผ'],
     'w_blending_initials': ['ก','ข','ค'],
 
     'initial_vowels': ['แ', 'เ', 'โ', 'ไ', 'ใ'],
@@ -192,6 +193,8 @@ for char in th_chars['tone_marks']:
     string = string + char
 T = string
 
+CONSONANTS = th_chars['consonants']
+VOWELS = th_chars['vowels']
 TONE_MARKS = th_chars['tone_marks']
 
 CONSONANT_CLASSES = th_chars['consonant_classes']
@@ -205,7 +208,8 @@ MID_CONSONANTS = th_chars['consonant_classes']['mid']
 LEADING_CONSONANTS = th_chars['leading_consonants']
 
 BLENDING_CONSONANTS = th_chars['blending_consonants']
-R_L_BLENDING_INITIALS = th_chars['r_l_blending_initials']
+R_BLENDING_INITIALS = th_chars['r_blending_initials']
+L_BLENDING_INITIALS = th_chars['l_blending_initials']
 W_BLENDING_INITIALS = th_chars['w_blending_initials']
 
 INITIAL_VOWELS = th_chars['initial_vowels']

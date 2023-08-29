@@ -2,25 +2,65 @@ import re
 
 from th_utils_classes import *
 from th_utils_regex import *
+from th_utils_tables import *
 
 pattern = f'เ[{C}]([{C}]|)ี([{T}]|)ยะ'
 
-syllable = ThaiSyllable("เคราะห์")
+syllable = ThaiSyllable("เกว")
 syllable_string = syllable.syllable_string
 print(syllable_string)
 
-#Needs to support 
+def check_true_blend(first_char, second_char):
+    if second_char == 'ร' and first_char in R_BLENDING_INITIALS:
+        return True
+    if second_char == 'ล' and first_char in L_BLENDING_INITIALS:
+        return True
+    if second_char == 'ว' and first_char in W_BLENDING_INITIALS:
+        return True
+    return False
+
 def process_cluster(syllable, init_vowel_char='', vert_vowel_char='', fin_vowel_chars='', has_tone=True):
 
-    if (init_vowel_char and not vert_vowel_char and not fin_vowel_chars):
-        consonants = ''
-        for thchar in range(1, len(syllalbe.th_chars)):
-            if has_tone and thchar.char in TONE_MARKS:
+    def cluster_final_consonants(start_index):
+        if len(syllable.thchars) <= start_index:
+            return
+        for i in range(start_index, len(syllable.thchars)):
+            if syllable.thchars[i].char in TONE_MARKS:
                 thchar.selfCluster('tone_marks_cluster')
                 continue
-            consonants.append(thchar)
-        if len(consonants) > 1:
-            print('unfinished')
+            syllable.thchars[i].selfCluster('final_consonants_cluster')
+
+    print(init_vowel_char, vert_vowel_char, fin_vowel_chars)
+    if init_vowel_char and not vert_vowel_char and not fin_vowel_chars:
+        syllable.thchars[0].selfCluster('initial_vowels_cluster')
+        if init_vowel_char == 'ไ' or init_vowel_char == 'ใ':
+            if check_true_blend(syllable.thchars[1].char, syllable.thchars[1].getAfterChar(0)):
+                syllable.thchars[1].selfCluster('initial_consonants_cluster')
+                syllable.thchars[1].getAfter(0).selfCluster('initial_consonants_cluster')
+                cluster_final_consonants(3)
+
+        elif check_true_blend(syllable.thchars[1].char, syllable.thchars[1].getAfterChar(0)):
+            if syllable.thchars[1].getAfterChar(1) in TONE_MARKS:
+                syllable.thchars[1].selfCluster('initial_consonants_cluster')
+                syllable.thchars[1].getAfter(0).selfCluster('initial_consonants_cluster')
+                cluster_final_consonants(3)
+            elif syllable.thchars[1].getAfterChar(1) and syllable.thchars[1].getAfterChar(2) != '์':
+                syllable.thchars[1].selfCluster('initial_consonants_cluster')
+                syllable.thchars[1].getAfter(0).selfCluster('initial_consonants_cluster')
+                cluster_final_consonants(3)
+            else:
+                if check_ambiguous_blend(syllable.thchars[0].char, syllable.thchars[1].char, syllable.thchars[2].char):
+                    syllable.thchars[1].selfCluster('initial_consonants_cluster')
+                    syllable.thchars[1].getAfter(0).selfCluster('initial_consonants_cluster')
+                    cluster_final_consonants(3)
+                else:
+                    syllable.thchars[1].selfCluster('initial_consonants_cluster')
+                    cluster_final_consonants(2)
+        if syllable.thchars[-1].char == '์':
+            syllable.thchars[-1].selfCluster('final_consonants_cluster')
+            syllable.thchars[-2].selfCluster('final_consonants_cluster')
+            return
+        return
 
     init_vowel_index = -1
     vert_vowel_index = len(syllable.thchars) + 1
@@ -51,13 +91,11 @@ def process_cluster(syllable, init_vowel_char='', vert_vowel_char='', fin_vowel_
                 thchar.selfCluster('tone_marks_cluster')
                 continue
             thchar.selfCluster('initial_consonants_cluster')
-            continue
         if i > vert_vowel_index and i < fin_vowel_indexes[0]:
             if has_tone and thchar.char in TONE_MARKS:
                 thchar.selfCluster('tone_marks_cluster')
                 continue
             thchar.selfCluster('final_consonants_cluster')
-            continue
         if i > fin_vowel_indexes[-1]:
             thchar.selfCluster('final_consonants_cluster')
 
@@ -133,7 +171,7 @@ elif re.search(f'เ[{C}]([{C}]|)([{T}]|)า', syllable_string):
 elif re.search(f'เ[{C}]([{C}]|)ิ([{T}]|)[{C}]', syllable_string):
     process_cluster(syllable, init_vowel_char='เ', vert_vowel_char='ิ')
 elif re.search(f'เ[{C}]', syllable_string):
-    process_cluster(syllable, init_vowel_char='เ', vert_vowel_char='ีิ')
+    process_cluster(syllable, init_vowel_char='เ')
 elif re.search(f'[{C}]([{T}]|)า', syllable_string):
     process_cluster(syllable, fin_vowel_chars='า')
     process_cluster_one_final(syllable, 'า')
@@ -185,4 +223,4 @@ elif re.search(f'[{C}][{C}]', syllable_string):
 process_roles(syllable)
 
 for thchar in syllable.thchars:
-    print(thchar.role)
+    print(thchar.cluster)
