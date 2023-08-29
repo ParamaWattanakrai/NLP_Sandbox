@@ -9,7 +9,6 @@ syllable = ThaiSyllable("เยีย")
 syllable_string = syllable.syllable_string
 print(syllable_string)
 
-#Final Con Shenanigans not supported เลย์
 def process_cluster(syllable, init_vowel_char='', vert_vowel_char='', fin_vowel_chars='', has_tone=True):
     init_vowel_index = -1
     vert_vowel_index = len(syllable.thchars) + 1
@@ -87,11 +86,11 @@ elif re.search(f'เ[{C}]([{C}]|)([{T}]|)าะ', syllable_string):
     process_cluster(syllable, init_vowel_char='เ', fin_vowel_chars='าะ')
 elif re.search(f'เ[{C}]([{C}]|)([{T}]|)ะ', syllable_string):
     process_cluster(syllable, init_vowel_char='เ', fin_vowel_chars='ะ')
-elif re.search(f'เ[{C}]([{C}]|)ี([{T}]|)ย', syllable_string):
+elif re.search(f'เ[{C}]([{C}]|)ี([{T}]|)ย[^์]', syllable_string):
     process_cluster(syllable, init_vowel_char='เ', vert_vowel_char='ี', fin_vowel_chars='ย')
-elif re.search(f'เ[{C}]([{C}]|)ื([{T}]|)อ', syllable_string):
+elif re.search(f'เ[{C}]([{C}]|)ื([{T}]|)อ[^์]', syllable_string):
     process_cluster(syllable, init_vowel_char='เ', vert_vowel_char='ื', fin_vowel_chars='อ')
-elif re.search(f'เ[{C}]([{C}]|)([{T}]|)อ', syllable_string):
+elif re.search(f'เ[{C}]([{C}]|)([{T}]|)อ[^์]', syllable_string):
     process_cluster(syllable, init_vowel_char='เ', fin_vowel_chars='อ')
 elif re.search(f'เ[{C}]([{C}]|)([{T}]|)า', syllable_string):
     process_cluster(syllable, init_vowel_char='เ', fin_vowel_chars='า')
@@ -117,7 +116,7 @@ elif re.search(f'โ[{C}]([{C}]|)([{T}]|)ะ', syllable_string):
 elif re.search(f'โ[{C}]', syllable_string):
     process_cluster(syllable, init_vowel_char='โ')
 
-elif re.search(f'ไ[{C}]ย', syllable_string):
+elif re.search(f'ไ[{C}]ย[^์]', syllable_string):
     process_cluster(syllable, init_vowel_char='ไ', fin_vowel_chars='ย')
 elif re.search(f'ไ[{C}]', syllable_string):
     process_cluster(syllable, init_vowel_char='ไ')
