@@ -229,55 +229,55 @@ class ThaiSyllable:
 
     def getInitialVowelsClusterList(self):
         if not self.initial_vowels_cluster:
-            return None
+            return []
         return self.initial_vowels_cluster
     def getInitialVowelsClusterString(self):
-        if self.getInitialVowelsClusterString():
-            return None
+        if not self.getInitialVowelsClusterList():
+            return []
         string = ''
-        for thchar in self.getInitialVowelsClusterString():
+        for thchar in self.getInitialVowelsClusterList():
             string = string + thchar.getChar()
         return string
     def getInitialConsonantsClusterList(self):
         if not self.initial_consonants_cluster:
-            return None
+            return []
         return self.initial_consonants_cluster
     def getInitialConsonantsClusterString(self):
         if not self.getInitialConsonantsClusterList():
-            return None
+            return []
         string = ''
         for thchar in self.getInitialConsonantsClusterList():
             string = string + thchar.getChar()
         return string
     def getToneMarksClusterList(self):
         if not self.tone_marks_cluster:
-            return None
+            return []
         return self.tone_marks_cluster
     def getToneMarksClusterString(self):
         if not self.getToneMarksClusterList():
-            return None
+            return []
         string = ''
         for thchar in self.getToneMarksClusterList():
             string = string + thchar.getChar()
         return string
     def getFinalVowelsClusterList(self):
         if not self.final_vowels_cluster:
-            return None
+            return []
         return self.final_vowels_cluster
     def getFinalVowelsClusterString(self):
         if not self.getFinalVowelsClusterList():
-            return None
+            return []
         string = ''
         for thchar in self.getFinalVowelsClusterList():
             string = string + thchar.getChar()
         return string
     def getFinalConsonantsClusterList(self):
         if not self.final_consonants_cluster:
-            return None
+            return []
         return self.final_consonants_cluster
     def getFinalConsonantsClusterString(self):
         if not self.getFinalConsonantsClusterList():
-            return None
+            return []
         string = ''
         for thchar in self.getFinalConsonantsClusterList():
             string = string + thchar.getChar()
