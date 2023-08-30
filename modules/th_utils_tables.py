@@ -1,5 +1,5 @@
-def check_ambiguous_blend(vowel, first_char, second_char):
-    table = {
+def check_ambiguous_initial(vowel, first_char, second_char):
+    ambiguous_table = {
         ('แ','ก','ร'): True,
         ('แ','ก','ล'): True,
         ('แ','ก','ว'): False,
@@ -48,4 +48,10 @@ def check_ambiguous_blend(vowel, first_char, second_char):
         ('โ','ต','ร'): True,
         ('โ','ผ','ล'): True,
     }
-    return table[(vowel, first_char, second_char)]
+    return ambiguous_table[(vowel, first_char, second_char)]
+
+def get_tone(initial_class, live_dead, tone_mark):
+    tone_table = {
+
+    }
+    return tone_table[(initial_class, live_dead, tone_mark)]

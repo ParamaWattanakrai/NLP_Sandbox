@@ -283,15 +283,26 @@ class ThaiSyllable:
             string = string + thchar.getChar()
         return string
     
+    def getInitialConsonantChar(self):
+        for thchar in self.getFinalConsonantsClusterList():
+            if thchar.role == 'initial_consonant':
+                return thchar.char
+        return None
+
+    def getBlendingConsonantChar(self):
+        for thchar in self.getFinalConsonantsClusterList():
+            if thchar.role == 'blending_consonant':
+                return thchar.char
+        return None
     
     def getVowelList(self):
         if not self.initial_vowels_cluster and not self.final_vowels_cluster:
             return None
         return self.initial_vowels_cluster + self.final_vowels_cluster
     def getVowelString(self):
-        if not self.getVowel():
+        if not self.getVowelList():
             return None
         string = ''
-        for thchar in self.getVowel():
+        for thchar in self.getVowelList():
             string = string + thchar.getChar()
         return string
