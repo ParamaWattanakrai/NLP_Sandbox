@@ -1,4 +1,4 @@
-def check_ambiguous_initial(vowel, first_char, second_char):
+def check_ambiguous_blend(vowel, first_char, second_char):
     ambiguous_table = {
         ('แ','ก','ร'): True,
         ('แ','ก','ล'): True,
@@ -47,11 +47,71 @@ def check_ambiguous_initial(vowel, first_char, second_char):
         ('โ','พ','ล'): False,
         ('โ','ต','ร'): True,
         ('โ','ผ','ล'): True,
+
+        ('โ','ห','ง'): False,
+        ('โ','ห','ญ'): False,
+        ('โ','ห','ณ'): False,
+        ('โ','ห','น'): False,
+        ('โ','ห','ม'): False,
+        ('โ','ห','ย'): False,
+        ('โ','ห','ร'): True,
+        ('โ','ห','ล'): True,
+        ('โ','ห','ว'): True,
+        ('โ','ห','ฬ'): False,
     }
     return ambiguous_table[(vowel, first_char, second_char)]
-
-def get_tone(initial_class, live_dead, tone_mark):
+def get_tone(initial_class, live_dead, duration, tone_mark):
     tone_table = {
+        ('mid','live','short',''): 'mid',
+        ('mid','live','short','่'): 'low',
+        ('mid','live','short','้'): 'falling',
+        ('mid','live','short','๊'): 'high',
+        ('mid','live','short','๋'): 'rising',
 
+        ('mid','live','long',''): 'mid',
+        ('mid','live','long','่'): 'low',
+        ('mid','live','long','้'): 'falling',
+        ('mid','live','long','๊'): 'high',
+        ('mid','live','long','๋'): 'rising',
+
+        ('mid','dead','short',''): 'low',
+        ('mid','dead','short','้'): 'falling',
+        ('mid','dead','short','๊'): 'high',
+        ('mid','dead','short','๋'): 'rising',
+
+        ('mid','dead','long',''): 'low',
+        ('mid','dead','long','้'): 'falling',
+        ('mid','dead','long','๊'): 'high',
+        ('mid','dead','long','๋'): 'rising',
+
+        ('high','live','short','่'): 'low',
+        ('high','live','short','้'): 'falling',
+        ('high','live','short',''): 'rising',
+
+        ('high','live','long','่'): 'low',
+        ('high','live','long','้'): 'falling',
+        ('high','live','long',''): 'rising',
+
+        ('high','dead','short',''): 'low',
+        ('high','dead','short','้'): 'falling',
+
+        ('high','dead','long',''): 'low',
+        ('high','dead','long','้'): 'falling',
+
+        ('low','live','short',''): 'mid',
+        ('low','live','short','่'): 'falling',
+        ('low','live','short','้'): 'high',
+
+        ('low','live','long',''): 'mid',
+        ('low','live','long','่'): 'falling',
+        ('low','live','long','้'): 'high',
+
+        ('low','dead','short','่'): 'falling',
+        ('low','dead','short',''): 'high',
+        ('low','dead','short','๋'): 'rising',
+
+        ('low','dead','long',''): 'falling',
+        ('low','dead','long','้'): 'high',
+        ('low','dead','long','๋'): 'rising',
     }
-    return tone_table[(initial_class, live_dead, tone_mark)]
+    return tone_table[(initial_class, live_dead, duration, tone_mark)]

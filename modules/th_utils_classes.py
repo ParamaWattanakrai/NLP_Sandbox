@@ -112,42 +112,19 @@ class ThaiSyllable:
             thchar.after = self.thchars[index+1:]
 
     def getInformation(self):
-        initial_vowels = []
-        initial_consonants = []
-        tone_marks = []
-        final_vowels = []
-        final_consonants = []
-        initial_vowels_roles = []
-
-        vowels = []
-
-        for char in self.initial_vowels_cluster:
-            initial_vowels.append([char.char, char.role])
-        for char in self.initial_consonants_cluster:
-            initial_consonants.append([char.char, char.role])
-        for char in self.tone_marks_cluster:
-            tone_marks.append([char.char, char.role])
-        for char in self.final_vowels_cluster:
-            final_vowels.append([char.char, char.role])
-        for char in self.final_consonants_cluster:
-            final_consonants.append([char.char, char.role])
-
-        for char in self.getVowel():
-            vowels.append(char.char)
-
         information = f'''
-            Syllable String: {self.string}
-            Initial Vowels Cluster: {initial_vowels}
-            Initial Consonants Cluster: {initial_consonants}
-            Tone Marks Cluster: {tone_marks}
-            Final Vowels Cluster: {final_vowels}
-            Final Consonants Cluster: {final_consonants}
+            Syllable String: {self.syllable_string}
+            Initial Vowels Cluster: {self.getInitialVowelsClusterString()}
+            Initial Consonants Cluster: {self.getInitialConsonantsClusterString()}
+            Tone Marks Cluster: {self.getToneMarksClusterString()}
+            Final Vowels Cluster: {self.getFinalVowelsClusterString()}
+            Final Consonants Cluster: {self.getFinalConsonantsClusterString()}
 
             Initial Sound: {self.initial_sound}
             Inital Class: {self.initial_class}
             Final Sound: {self.final_sound}
             
-            Vowel Form: {vowels}
+            Vowel Form: {self.getVowelString()}
             Vowel Default Form: {self.vowel_default}
             Vowel Duration: {self.vowel_duration}
 
@@ -156,9 +133,20 @@ class ThaiSyllable:
 
             Live/Dead: {self.live_dead}
 
-            Tone Mark: {self.tone_mark}
+            Tone Mark: {self.getToneMarksClusterString()}
             Tone: {self.tone}
             '''
+        information = f'''
+             Leading Consonant: {self.getLeadingConsonantChar()}
+             Initial Consonant: {self.getInitialConsonantChar()}
+             Blending Consonant: {self.getBlendingConsonantChar()}
+
+             Vowel Default: {self.getDefaultVowel()}
+             Vowel Duration: {self.getVowelDuration()}
+             Tone: {self.getTone()}
+
+             Final Sound: {self.getFinalSound()}
+             '''
         return information
     def updateCluster(self):
         if self.getInitialVowelsClusterList():
@@ -244,7 +232,7 @@ class ThaiSyllable:
         return self.initial_consonants_cluster
     def getInitialConsonantsClusterString(self):
         if not self.getInitialConsonantsClusterList():
-            return []
+            return ''
         string = ''
         for thchar in self.getInitialConsonantsClusterList():
             string = string + thchar.getChar()
@@ -255,7 +243,7 @@ class ThaiSyllable:
         return self.tone_marks_cluster
     def getToneMarksClusterString(self):
         if not self.getToneMarksClusterList():
-            return []
+            return ''
         string = ''
         for thchar in self.getToneMarksClusterList():
             string = string + thchar.getChar()
@@ -266,7 +254,7 @@ class ThaiSyllable:
         return self.final_vowels_cluster
     def getFinalVowelsClusterString(self):
         if not self.getFinalVowelsClusterList():
-            return []
+            return ''
         string = ''
         for thchar in self.getFinalVowelsClusterList():
             string = string + thchar.getChar()
@@ -277,23 +265,35 @@ class ThaiSyllable:
         return self.final_consonants_cluster
     def getFinalConsonantsClusterString(self):
         if not self.getFinalConsonantsClusterList():
-            return []
+            return ''
         string = ''
         for thchar in self.getFinalConsonantsClusterList():
             string = string + thchar.getChar()
         return string
     
+    def getLeadingConsonantChar(self):
+        for thchar in self.getInitialConsonantsClusterList():
+            if thchar.role == 'leading_consonant':
+                return thchar.char
+        return None
     def getInitialConsonantChar(self):
-        for thchar in self.getFinalConsonantsClusterList():
+        for thchar in self.getInitialConsonantsClusterList():
             if thchar.role == 'initial_consonant':
                 return thchar.char
         return None
-
     def getBlendingConsonantChar(self):
-        for thchar in self.getFinalConsonantsClusterList():
+        for thchar in self.getInitialConsonantsClusterList():
             if thchar.role == 'blending_consonant':
                 return thchar.char
         return None
+    def getDefaultVowel(self):
+        return self.vowel_default
+    def getTone(self):
+        return self.tone
+    def getVowelDuration(self):
+        return self.vowel_duration
+    def getFinalSound(self):
+        return self.final_sound
     
     def getVowelList(self):
         if not self.initial_vowels_cluster and not self.final_vowels_cluster:

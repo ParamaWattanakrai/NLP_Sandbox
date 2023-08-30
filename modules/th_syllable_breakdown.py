@@ -6,7 +6,7 @@ from th_utils_tables import *
 
 pattern = f'เ[{C}]([{C}]|)ี([{T}]|)ยะ'
 
-syllable = ThaiSyllable("โรง")
+syllable = ThaiSyllable("ไหล")
 syllable_string = syllable.syllable_string
 print(syllable_string)
 
@@ -37,13 +37,16 @@ def process_cluster(syllable, init_vowel_char='', vert_vowel_char='', fin_vowel_
                 continue
             syllable.thchars[i].selfCluster('final_consonants_cluster')
 
-    print(init_vowel_char, vert_vowel_char, fin_vowel_chars)
     if init_vowel_char and not vert_vowel_char and not fin_vowel_chars:
         syllable.thchars[0].selfCluster('initial_vowels_cluster')
         if init_vowel_char == 'ไ' or init_vowel_char == 'ใ':
-            if check_true_blend(syllable.thchars[1].char, syllable.thchars[1].getAfterChar(0)):
+            if (check_true_blend(syllable.thchars[1].char, syllable.thchars[1].getAfterChar(0)) or check_leading(syllable.thchars[1].char, syllable.thchars[1].getAfterChar(0))) and \
+                syllable.thchars[1].getAfterChar(1) != '์':
                 syllable.thchars[1].selfCluster('initial_consonants_cluster')
                 syllable.thchars[1].getAfter(0).selfCluster('initial_consonants_cluster')
+                cluster_final_consonants(3)
+            else:
+                syllable.thchars[1].selfCluster('initial_consonants_cluster')
                 cluster_final_consonants(3)
 
         elif check_true_blend(syllable.thchars[1].char, syllable.thchars[1].getAfterChar(0)) or \
@@ -70,7 +73,6 @@ def process_cluster(syllable, init_vowel_char='', vert_vowel_char='', fin_vowel_
         if syllable.thchars[-1].char == '์':
             syllable.thchars[-1].selfCluster('final_consonants_cluster')
             syllable.thchars[-2].selfCluster('final_consonants_cluster')
-            return
         return
 
     init_vowel_index = -1
@@ -125,7 +127,7 @@ def process_roles(syllable):
             thchar.selfRole('tone_mark')
 
     if len(initial_consonants_cluster) == 2:
-        if check_leading(initial_consonants_cluster[0], initial_consonants_cluster[1]):
+        if check_leading(initial_consonants_cluster[0].char, initial_consonants_cluster[1].char):
             initial_consonants_cluster[0].selfRole('leading_consonant')
             initial_consonants_cluster[0].getAfter(0).selfRole('initial_consonant')
         elif initial_consonants_cluster[-1] is not initial_consonants_cluster[0]:
@@ -171,6 +173,11 @@ def process_final_sound(syllable):
             final_sound = final_sound_key
     syllable.final_sound = final_sound
 
+def get_default_vowel(vowel_string):
+    for vowel_forms_key in VOWEL_FORMS.keys():
+        if vowel_string in VOWEL_FORMS[vowel_forms_key]:
+            return vowel_forms_key
+
 def process_vowel(syllable):
     vowel_string = syllable.getVowelString()
     if not vowel_string:
@@ -203,10 +210,10 @@ def process_live_dead(syllable):
         syllable.live_dead = 'live'
 
 def process_tone(syllable):
-    if not syllable.tone_marks:
-        return
-    syllable.tone_mark = syllable.tone_marks[0].char
-    get_tone(syllable.initial_class, syllable.live_dead, syllable.tone_mark)
+    tone_mark = syllable.getToneMarksClusterString()
+    print(tone_mark)
+    syllable.tone_mark = tone_mark
+    syllable.tone = get_tone(syllable.initial_class, syllable.live_dead, syllable.vowel_duration, tone_mark)
 
 if re.search(f'[{C}]ึ', syllable_string):
     syllable.vowel_default = '-ึ'
@@ -299,14 +306,14 @@ elif re.search(f'[{C}]([{T}]|)ว[{C}]', syllable_string):
 elif re.search(f'[{C}][{C}]', syllable_string):
     print('implied oh')
 
+print('cluster')
 for thchar in syllable.thchars:
-    print('cluster')
     print(thchar.cluster)
 
 process_roles(syllable)
 
+print('role')
 for thchar in syllable.thchars:
-    print('role')
     print(thchar.role)
 
 process_blend(syllable)
