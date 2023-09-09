@@ -38,7 +38,7 @@ model = CRFModel(num_tags)
 criterion = model.crf
 optimizer = optim.SGD(model.parameters(), lr = 0.01)
 
-num_epochs = 1
+num_epochs = 1000
 for epoch in range(num_epochs):
     model.train()
     total_loss = 0
