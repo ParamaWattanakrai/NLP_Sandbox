@@ -27,8 +27,7 @@ for sent_tags in y_train:
 X_train_idx = [[word_to_idx.get(word, word_to_idx['<UNK>']) for word, _ in sent] for sent in X_train]
 y_train_idx = [[tag_to_idx[tag] for tag in sent_tags] for sent_tags in y_train] 
 
-print(word_to_idx)
-print(tag_to_idx)
+
 print(X_train_idx)
 print(y_train_idx)
 
@@ -53,16 +52,18 @@ criterion = model.crf
 optimizer = optim.Adam(model.parameters())
 
 # Training loop
-num_epochs = 1000
+num_epochs = 10
 for epoch in range(num_epochs):
     model.train()
     total_loss = 0
     
     for inputs, targets in zip(X_train_idx, y_train_idx):
-        inputs = torch.tensor(inputs).unsqueeze(0)
-        targets = torch.tensor(targets).unsqueeze(0)
+        inputs = torch.tensor(inputs)
+        print(inputs.unsqueeze(0))
+        targets = torch.tensor(targets)
         
         optimizer.zero_grad()
+        print(inputs)
         outputs = model(inputs)
         loss = -criterion(outputs, targets)
         loss.backward()

@@ -38,18 +38,19 @@ class DataLoader():
             return f'No object found with label: {target_label}'
 
 def embed(type, word, data):
-    list_of_vector = []
+    list_of_tensor = []
     for char in word:
         if type == "one_hot":
-            list_of_vector.append(data.searchData(char).one_hot)
-        if type == "ipa":
-            list_of_vector.append(data.searchData(char).vector)
-    return list_of_vector
+            list_of_tensor.append(data.searchData(char).one_hot)
+        elif type == "ipa":
+            list_of_tensor.append(data.searchData(char).vector)    
+    final_tensor = torch.stack(list_of_tensor, dim=0)
+    return final_tensor
 
 # -----------------------------Trial-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-# if __name__ == '__main__':
-#     data = DataLoader()
+if __name__ == '__main__':
+    data = DataLoader()
 
-#     while True:
-#         sentence = input("\n>>> ")
-#         print(embed("one_hot", sentence, data))
+    while True:
+        sentence = input("\n>>> ")
+        print(embed("one_hot", sentence, data))

@@ -3,10 +3,9 @@ import torch.nn as nn
 import torch.optim as optim
 from data.crf_segmentation import X_train, Y_train
 from torchcrf import CRF
-from utils import DataLoader
+from utils import DataLoader, embed
 
-embedded = DataLoader
-
+embedded = DataLoader()
 char_to_idx = {'<PAD>': 0,'<UNK>': 1}
 tag_to_idx = {'<PAD>': 0}
 for sent_tags in Y_train:
@@ -19,19 +18,17 @@ Y_train_idx = [[tag_to_idx[tag] for tag in word_tags] for word_tags in Y_train]
 
 # print(char_to_idx)
 # print(tag_to_idx)
-
+print(X_train)
 # print(X_train_idx)
 # print(Y_train_idx)
 
 class CRFModel(nn.Module):
     def __init__(self, num_tags):
         super(CRFModel, self).__init__()
-        self.embedding = nn.Embedding(len(char_to_idx), 50)
-        self.linear = nn.Linear(50, num_tags)
+        self.linear = nn.Linear(68, num_tags)
         self.crf = CRF(num_tags, batch_first=True)
     
     def forward(self, x):
-        x = self.embedding(x)
         emissions = self.linear(x)
         return emissions
 
@@ -46,12 +43,14 @@ for epoch in range(num_epochs):
     model.train()
     total_loss = 0
     
-    for inputs, targets in zip(X_train_idx, Y_train_idx):
-        inputs = torch.tensor(inputs).unsqueeze(0)
+    for inputs, targets in zip(X_train, Y_train_idx):
+        bruh = embed("one_hot", inputs, embedded).unsqueeze(0)
+        print(bruh)
         targets = torch.tensor(targets).unsqueeze(0)
+        print(targets)
         
         optimizer.zero_grad()
-        outputs = model(inputs)
+        outputs = model(bruh)
         loss = -criterion(outputs, targets)
         loss.backward()
         optimizer.step()
@@ -64,8 +63,7 @@ for epoch in range(num_epochs):
 while True:
     input_sentence = input("Enter a sentence: ").split()
     input_word = [(char)for char in input_sentence[0]]
-    input_sentence_idx = [char_to_idx.get(word, char_to_idx['<UNK>']) for word in input_word]
-    input_tensor = torch.tensor(input_sentence_idx).unsqueeze(0)
+    input_tensor = embed("one_hot", input_word, embedded).unsqueeze(0)
 
     model.eval()
 
