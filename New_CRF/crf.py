@@ -44,10 +44,8 @@ for epoch in range(num_epochs):
     total_loss = 0
     
     for inputs, targets in zip(X_train, Y_train_idx):
-        bruh = embed("one_hot", inputs, embedded).unsqueeze(0)
-        print(bruh)
+        bruh = embed("ipa", inputs, embedded).unsqueeze(0)
         targets = torch.tensor(targets).unsqueeze(0)
-        print(targets)
         
         optimizer.zero_grad()
         outputs = model(bruh)
