@@ -1,199 +1,375 @@
-class ThaiCharacter():
-    def __init__(self, char, syllable, position, before=[], after=[], cluster='unknown', char_role='unknown'):
-        self.char = char
-        self.position = position
-        self.syllable = syllable
-        self.before = before
-        self.after = after
-        self.cluster = cluster
-        self.role = char_role
+from experimental import training_data
+# Author: Robert Guthrie
 
-    def getInformation(self):
-        chars_before = []
-        chars_after = []
-        for char in self.before:
-            chars_before.append(char.char)
-        for char in self.after:
-            chars_after.append(char.char)
-        return f'''
-            Character: {self.char}
-            In Syllable: {self.syllable.string}
-            Position: {self.position}
-            Class: {self.consonant_class}
-            In Cluster: {self.cluster}
-            Role: {self.role}\nChracters Before: {chars_before}\nCharacters After: {chars_after}
-            '''
-    def getChar(self):
-        return self.char
-    def getPosition(self):
-        return self.position
-    def getSyllable(self):
-        return self.syllable
-    def getClass(self):
-        if not self.consonant_class:
-            return None
-    
-    def getBefore(self, distance):
-        distance += 1
-        if len(self.before) < distance:
-            return None
-        return self.before[-distance]
-    def getAfter(self, distance):
-        if len(self.after) <= distance:
-            return None
-        return self.after[distance]
-    def getBeforeChar(self, distance):
-        if not self.getBefore(distance):
-            return None
-        return self.getBefore(distance).getChar()
-    def getAfterChar(self, distance):
-        if not self.getAfter(distance):
-            return None
-        return self.getAfter[distance].getChar()
-    
-    def selfCluster(self, cluster):
-        return self.syllable.assignCluster(self, cluster)
-    def selfRole(self, role):
-        return self.syllable.assignRole(self, role)
+import torch
+import torch.autograd as autograd
+import torch.nn as nn
+import torch.optim as optim
 
-class Syllable:
-    def __init__(self, string):
-        self.string = string
-        self.chars = []
-        
-        self.initial_vowels_cluster = []
-        self.initial_consonants_cluster = []
-        self.tone_marks_cluster = []
-        self.final_vowels_cluster = []
-        self.final_consonants_cluster = []
+torch.manual_seed(1)
 
-        self.leading_consonants = []
-        self.initial_consonants = []
-        self.blending_consonants = []
-        self.vowels = []
-        self.tone_marks = []
-        self.final_consonants = []
-        self.silent_characters = []
+def argmax(vec):
+    # return the argmax as a python int
+    _, idx = torch.max(vec, 1)
+    return idx.item()
 
-        self.initial_sound = ''
-        self.initial_class = ''
-        self.final_sound = ''
 
-        self.vowel_default = ''
-        self.vowel_duration = ''
-        self.vowel_short = ''
+def prepare_sequence(seq, to_ix):
+    idxs = [to_ix[w] for w in seq]
+    return torch.tensor(idxs, dtype=torch.long)
 
-        self.vowel_long = ''
-        
-        self.live_dead = ''
 
-        self.tone_mark = ''
-        self.tone = ''
+# Compute log sum exp in a numerically stable way for the forward algorithm
+def log_sum_exp(vec):
+    max_score = vec[0, argmax(vec)]
+    max_score_broadcast = max_score.view(1, -1).expand(1, vec.size()[1])
+    return max_score + \
+        torch.log(torch.sum(torch.exp(vec - max_score_broadcast)))
 
-        for index, char in enumerate(string):
-            thischar = ThaiCharacter(char, self, index)
-            self.chars.append(thischar)
-        for index, char in enumerate(self.chars):
-            char.before = self.chars[:index]
-            char.after = self.chars[index+1:]
-    def getInformation(self):
-        initial_vowels = []
-        initial_consonants = []
-        tone_marks = []
-        final_vowels = []
-        final_consonants = []
-        initial_vowels_roles = []
+class BiLSTM_CRF(nn.Module):
 
-        vowels = []
+    def __init__(self, vocab_size, tag_to_ix, embedding_dim, hidden_dim):
+        super(BiLSTM_CRF, self).__init__()
+        self.embedding_dim = embedding_dim
+        self.hidden_dim = hidden_dim
+        self.vocab_size = vocab_size
+        self.tag_to_ix = tag_to_ix
+        self.tagset_size = len(tag_to_ix)
 
-        for char in self.initial_vowels_cluster:
-            initial_vowels.append([char.char, char.role])
-        for char in self.initial_consonants_cluster:
-            initial_consonants.append([char.char, char.role])
-        for char in self.tone_marks_cluster:
-            tone_marks.append([char.char, char.role])
-        for char in self.final_vowels_cluster:
-            final_vowels.append([char.char, char.role])
-        for char in self.final_consonants_cluster:
-            final_consonants.append([char.char, char.role])
+        self.word_embeds = nn.Embedding(vocab_size, embedding_dim)
+        self.lstm = nn.LSTM(embedding_dim, hidden_dim // 2,
+                            num_layers=1, bidirectional=True)
 
-        for char in self.getVowel():
-            vowels.append(char.char)
+        # Maps the output of the LSTM into tag space.
+        self.hidden2tag = nn.Linear(hidden_dim, self.tagset_size)
 
-        information = f'''
-            Syllable String: {self.string}
-            Initial Vowels Cluster: {initial_vowels}
-            Initial Consonants Cluster: {initial_consonants}
-            Tone Marks Cluster: {tone_marks}
-            Final Vowels Cluster: {final_vowels}
-            Final Consonants Cluster: {final_consonants}
+        # Matrix of transition parameters.  Entry i,j is the score of
+        # transitioning *to* i *from* j.
+        self.transitions = nn.Parameter(
+            torch.randn(self.tagset_size, self.tagset_size))
 
-            Initial Sound: {self.initial_sound}
-            Inital Class: {self.initial_class}
-            Final Sound: {self.final_sound}
-            
-            Vowel Form: {vowels}
-            Vowel Default Form: {self.vowel_default}
-            Vowel Duration: {self.vowel_duration}
+        # These two statements enforce the constraint that we never transfer
+        # to the start tag and we never transfer from the stop tag
+        self.transitions.data[tag_to_ix[START_TAG], :] = -10000
+        self.transitions.data[:, tag_to_ix[STOP_TAG]] = -10000
 
-            Vowel Short Form: {self.vowel_short}
-            Vowel Long Form: {self.vowel_long}
+        self.hidden = self.init_hidden()
 
-            Live/Dead: {self.live_dead}
+    def init_hidden(self):
+        return (torch.randn(2, 1, self.hidden_dim // 2),
+                torch.randn(2, 1, self.hidden_dim // 2))
 
-            Tone Mark: {self.tone_mark}
-            Tone: {self.tone}
-            '''
-        return information
-    def assignCluster(self, char, cluster):
-        if cluster == 'initial_vowels_cluster':
-            char.cluster = cluster
-            self.initial_vowels_cluster.append(char)
-        elif cluster == 'initial_consonants_cluster':
-            char.cluster = cluster
-            self.initial_consonants_cluster.append(char)
-        elif cluster == 'tone_marks_cluster':
-            char.cluster = cluster
-            self.tone_marks_cluster.append(char)
-        elif cluster == 'final_vowels_cluster':
-            char.cluster = cluster
-            self.final_vowels_cluster.append(char)
-        elif cluster == 'final_consonants_cluster':
-            char.cluster = cluster
-            self.final_consonants_cluster.append(char)
-        else:
-            return None
-    def assignRole(self, char, role):
-        if role == 'leading_consonant':
-            char.role = role
-            self.leading_consonants.append(char)
-        elif role == 'initial_consonant':
-            char.role = role
-            self.initial_consonants.append(char)    
-        elif role == 'blending_consonant':
-            char.role = role
-            self.blending_consonants.append(char)
-        elif role == 'vowel':
-            char.role = role
-            self.vowels.append(char)
-        elif role == 'tone_mark':
-            char.role = role
-            self.tone_marks.append(char)
-        elif role == 'final_consonant':
-            char.role = role
-            self.final_consonants.append(char)
-        elif role == 'silent_character':
-            char.role = role
-            self.silent_characters.append(char)
-        else:
-            return None
-    def getVowelList(self):
-        return self.initial_vowels_cluster + self.final_vowels_cluster
-    def getVowelString(self):
-        vowel_string = ''
-        for char in self.getVowel():
-            vowel_string = vowel_string + char.char
-        return vowel_string
+    def _forward_alg(self, feats):
+        # Do the forward algorithm to compute the partition function
+        init_alphas = torch.full((1, self.tagset_size), -10000.)
+        # START_TAG has all of the score.
+        init_alphas[0][self.tag_to_ix[START_TAG]] = 0.
 
-a = Syllable('สวัสดี')
-print(a.chars[3].getBeforeChar(3))
+        # Wrap in a variable so that we will get automatic backprop
+        forward_var = init_alphas
+
+        # Iterate through the sentence
+        for feat in feats:
+            alphas_t = []  # The forward tensors at this timestep
+            for next_tag in range(self.tagset_size):
+                # broadcast the emission score: it is the same regardless of
+                # the previous tag
+                emit_score = feat[next_tag].view(
+                    1, -1).expand(1, self.tagset_size)
+                # the ith entry of trans_score is the score of transitioning to
+                # next_tag from i
+                trans_score = self.transitions[next_tag].view(1, -1)
+                # The ith entry of next_tag_var is the value for the
+                # edge (i -> next_tag) before we do log-sum-exp
+                next_tag_var = forward_var + trans_score + emit_score
+                # The forward variable for this tag is log-sum-exp of all the
+                # scores.
+                alphas_t.append(log_sum_exp(next_tag_var).view(1))
+            forward_var = torch.cat(alphas_t).view(1, -1)
+        terminal_var = forward_var + self.transitions[self.tag_to_ix[STOP_TAG]]
+        alpha = log_sum_exp(terminal_var)
+        return alpha
+
+    def _get_lstm_features(self, sentence):
+        self.hidden = self.init_hidden()
+        embeds = self.word_embeds(sentence).view(len(sentence), 1, -1)
+        lstm_out, self.hidden = self.lstm(embeds, self.hidden)
+        lstm_out = lstm_out.view(len(sentence), self.hidden_dim)
+        lstm_feats = self.hidden2tag(lstm_out)
+        return lstm_feats
+
+    def _score_sentence(self, feats, tags):
+        # Gives the score of a provided tag sequence
+        score = torch.zeros(1)
+        tags = torch.cat([torch.tensor([self.tag_to_ix[START_TAG]], dtype=torch.long), tags])
+        for i, feat in enumerate(feats):
+            score = score + \
+                self.transitions[tags[i + 1], tags[i]] + feat[tags[i + 1]]
+        score = score + self.transitions[self.tag_to_ix[STOP_TAG], tags[-1]]
+        return score
+
+    def _viterbi_decode(self, feats):
+        backpointers = []
+
+        # Initialize the viterbi variables in log space
+        init_vvars = torch.full((1, self.tagset_size), -10000.)
+        init_vvars[0][self.tag_to_ix[START_TAG]] = 0
+
+        # forward_var at step i holds the viterbi variables for step i-1
+        forward_var = init_vvars
+        for feat in feats:
+            bptrs_t = []  # holds the backpointers for this step
+            viterbivars_t = []  # holds the viterbi variables for this step
+
+            for next_tag in range(self.tagset_size):
+                # next_tag_var[i] holds the viterbi variable for tag i at the
+                # previous step, plus the score of transitioning
+                # from tag i to next_tag.
+                # We don't include the emission scores here because the max
+                # does not depend on them (we add them in below)
+                next_tag_var = forward_var + self.transitions[next_tag]
+                best_tag_id = argmax(next_tag_var)
+                bptrs_t.append(best_tag_id)
+                viterbivars_t.append(next_tag_var[0][best_tag_id].view(1))
+            # Now add in the emission scores, and assign forward_var to the set
+            # of viterbi variables we just computed
+            forward_var = (torch.cat(viterbivars_t) + feat).view(1, -1)
+            backpointers.append(bptrs_t)
+
+        # Transition to STOP_TAG
+        terminal_var = forward_var + self.transitions[self.tag_to_ix[STOP_TAG]]
+        best_tag_id = argmax(terminal_var)
+        path_score = terminal_var[0][best_tag_id]
+
+        # Follow the back pointers to decode the best path.
+        best_path = [best_tag_id]
+        for bptrs_t in reversed(backpointers):
+            best_tag_id = bptrs_t[best_tag_id]
+            best_path.append(best_tag_id)
+        # Pop off the start tag (we dont want to return that to the caller)
+        start = best_path.pop()
+        assert start == self.tag_to_ix[START_TAG]  # Sanity check
+        best_path.reverse()
+        return path_score, best_path
+
+    def neg_log_likelihood(self, sentence, tags):
+        feats = self._get_lstm_features(sentence)
+        forward_score = self._forward_alg(feats)
+        gold_score = self._score_sentence(feats, tags)
+        return forward_score - gold_score
+
+    def forward(self, sentence):  # dont confuse this with _forward_alg above.
+        # Get the emission scores from the BiLSTM
+        lstm_feats = self._get_lstm_features(sentence)
+
+        # Find the best path, given the features.
+        score, tag_seq = self._viterbi_decode(lstm_feats)
+        return score, tag_seq
+
+class BiLSTM_CRF(nn.Module):
+
+    def __init__(self, vocab_size, tag_to_ix, embedding_dim, hidden_dim):
+        super(BiLSTM_CRF, self).__init__()
+        self.embedding_dim = embedding_dim
+        self.hidden_dim = hidden_dim
+        self.vocab_size = vocab_size
+        self.tag_to_ix = tag_to_ix
+        self.tagset_size = len(tag_to_ix)
+
+        self.word_embeds = nn.Embedding(vocab_size, embedding_dim)
+        self.lstm = nn.LSTM(embedding_dim, hidden_dim // 2,
+                            num_layers=1, bidirectional=True)
+
+        # Maps the output of the LSTM into tag space.
+        self.hidden2tag = nn.Linear(hidden_dim, self.tagset_size)
+
+        # Matrix of transition parameters.  Entry i,j is the score of
+        # transitioning *to* i *from* j.
+        self.transitions = nn.Parameter(
+            torch.randn(self.tagset_size, self.tagset_size))
+
+        # These two statements enforce the constraint that we never transfer
+        # to the start tag and we never transfer from the stop tag
+        self.transitions.data[tag_to_ix[START_TAG], :] = -10000
+        self.transitions.data[:, tag_to_ix[STOP_TAG]] = -10000
+
+        self.hidden = self.init_hidden()
+
+    def init_hidden(self):
+        return (torch.randn(2, 1, self.hidden_dim // 2),
+                torch.randn(2, 1, self.hidden_dim // 2))
+
+    def _forward_alg(self, feats):
+        # Do the forward algorithm to compute the partition function
+        init_alphas = torch.full((1, self.tagset_size), -10000.)
+        # START_TAG has all of the score.
+        init_alphas[0][self.tag_to_ix[START_TAG]] = 0.
+
+        # Wrap in a variable so that we will get automatic backprop
+        forward_var = init_alphas
+
+        # Iterate through the sentence
+        for feat in feats:
+            alphas_t = []  # The forward tensors at this timestep
+            for next_tag in range(self.tagset_size):
+                # broadcast the emission score: it is the same regardless of
+                # the previous tag
+                emit_score = feat[next_tag].view(
+                    1, -1).expand(1, self.tagset_size)
+                # the ith entry of trans_score is the score of transitioning to
+                # next_tag from i
+                trans_score = self.transitions[next_tag].view(1, -1)
+                # The ith entry of next_tag_var is the value for the
+                # edge (i -> next_tag) before we do log-sum-exp
+                next_tag_var = forward_var + trans_score + emit_score
+                # The forward variable for this tag is log-sum-exp of all the
+                # scores.
+                alphas_t.append(log_sum_exp(next_tag_var).view(1))
+            forward_var = torch.cat(alphas_t).view(1, -1)
+        terminal_var = forward_var + self.transitions[self.tag_to_ix[STOP_TAG]]
+        alpha = log_sum_exp(terminal_var)
+        return alpha
+
+    def _get_lstm_features(self, sentence):
+        self.hidden = self.init_hidden()
+        embeds = self.word_embeds(sentence).view(len(sentence), 1, -1)
+        lstm_out, self.hidden = self.lstm(embeds, self.hidden)
+        lstm_out = lstm_out.view(len(sentence), self.hidden_dim)
+        lstm_feats = self.hidden2tag(lstm_out)
+        return lstm_feats
+
+    def _score_sentence(self, feats, tags):
+        # Gives the score of a provided tag sequence
+        score = torch.zeros(1)
+        tags = torch.cat([torch.tensor([self.tag_to_ix[START_TAG]], dtype=torch.long), tags])
+        for i, feat in enumerate(feats):
+            score = score + \
+                self.transitions[tags[i + 1], tags[i]] + feat[tags[i + 1]]
+        score = score + self.transitions[self.tag_to_ix[STOP_TAG], tags[-1]]
+        return score
+
+    def _viterbi_decode(self, feats):
+        backpointers = []
+
+        # Initialize the viterbi variables in log space
+        init_vvars = torch.full((1, self.tagset_size), -10000.)
+        init_vvars[0][self.tag_to_ix[START_TAG]] = 0
+
+        # forward_var at step i holds the viterbi variables for step i-1
+        forward_var = init_vvars
+        for feat in feats:
+            bptrs_t = []  # holds the backpointers for this step
+            viterbivars_t = []  # holds the viterbi variables for this step
+
+            for next_tag in range(self.tagset_size):
+                # next_tag_var[i] holds the viterbi variable for tag i at the
+                # previous step, plus the score of transitioning
+                # from tag i to next_tag.
+                # We don't include the emission scores here because the max
+                # does not depend on them (we add them in below)
+                next_tag_var = forward_var + self.transitions[next_tag]
+                best_tag_id = argmax(next_tag_var)
+                bptrs_t.append(best_tag_id)
+                viterbivars_t.append(next_tag_var[0][best_tag_id].view(1))
+            # Now add in the emission scores, and assign forward_var to the set
+            # of viterbi variables we just computed
+            forward_var = (torch.cat(viterbivars_t) + feat).view(1, -1)
+            backpointers.append(bptrs_t)
+
+        # Transition to STOP_TAG
+        terminal_var = forward_var + self.transitions[self.tag_to_ix[STOP_TAG]]
+        best_tag_id = argmax(terminal_var)
+        path_score = terminal_var[0][best_tag_id]
+
+        # Follow the back pointers to decode the best path.
+        best_path = [best_tag_id]
+        for bptrs_t in reversed(backpointers):
+            best_tag_id = bptrs_t[best_tag_id]
+            best_path.append(best_tag_id)
+        # Pop off the start tag (we dont want to return that to the caller)
+        start = best_path.pop()
+        assert start == self.tag_to_ix[START_TAG]  # Sanity check
+        best_path.reverse()
+        return path_score, best_path
+
+    def neg_log_likelihood(self, sentence, tags):
+        feats = self._get_lstm_features(sentence)
+        forward_score = self._forward_alg(feats)
+        gold_score = self._score_sentence(feats, tags)
+        return forward_score - gold_score
+
+    def forward(self, sentence):  # dont confuse this with _forward_alg above.
+        # Get the emission scores from the BiLSTM
+        lstm_feats = self._get_lstm_features(sentence)
+
+        # Find the best path, given the features.
+        score, tag_seq = self._viterbi_decode(lstm_feats)
+        return score, tag_seq
+
+START_TAG = "<START>"
+STOP_TAG = "<STOP>"
+EMBEDDING_DIM = 5
+HIDDEN_DIM = 4
+
+# Make up some training data
+# training_data = [(
+#     "the wall street journal reported today that apple corporation made money".split(),
+#     "B I I I O O O B I O O".split()
+# ), (
+#     "georgia tech is a university in georgia".split(),
+#     "B I O O O O B".split()
+# )]
+
+word_to_ix = {}
+for sentence, tags in training_data:
+    for word in sentence:
+        if word not in word_to_ix:
+            word_to_ix[word] = len(word_to_ix)
+
+tag_to_ix = {"B": 0, "I": 1, "O": 2, START_TAG: 3, STOP_TAG: 4}
+
+model = BiLSTM_CRF(len(word_to_ix), tag_to_ix, EMBEDDING_DIM, HIDDEN_DIM)
+optimizer = optim.SGD(model.parameters(), lr=0.01, weight_decay=1e-4)
+
+# Check predictions before training
+with torch.no_grad():
+    precheck_sent = prepare_sequence(training_data[0][0], word_to_ix)
+    precheck_tags = torch.tensor([tag_to_ix[t] for t in training_data[0][1]], dtype=torch.long)
+    print(model(precheck_sent))
+
+# Make sure prepare_sequence from earlier in the LSTM section is loaded
+for epoch in range(
+        300):  # again, normally you would NOT do 300 epochs, it is toy data
+    for sentence, tags in training_data:
+        # Step 1. Remember that Pytorch accumulates gradients.
+        # We need to clear them out before each instance
+        model.zero_grad()
+
+        # Step 2. Get our inputs ready for the network, that is,
+        # turn them into Tensors of word indices.
+        sentence_in = prepare_sequence(sentence, word_to_ix)
+        targets = torch.tensor([tag_to_ix[t] for t in tags], dtype=torch.long)
+
+        # Step 3. Run our forward pass.
+        loss = model.neg_log_likelihood(sentence_in, targets)
+
+        # Step 4. Compute the loss, gradients, and update the parameters by
+        # calling optimizer.step()
+        loss.backward()
+        optimizer.step()
+    print(f"Epoch [{epoch}], Loss: {loss}")
+
+# Check predictions after training
+with torch.no_grad():
+    precheck_sent = prepare_sequence(training_data[0][0], word_to_ix)
+    print(training_data[0][0])
+    print(precheck_sent)
+    print(model(precheck_sent))
+# We got it!
+
+while True:
+    input_sentence = input("Enter a sentence: ").split()
+    input_word = [(char)for char in input_sentence[0]]
+    precheck_sent = prepare_sequence(input_word, word_to_ix)
+    print(precheck_sent)
+    print(model(precheck_sent))
