@@ -63,7 +63,7 @@ class BiLSTM_CRF(nn.Module):
     def _get_lstm_features(self, sentence, input):
         self.hidden = self.init_hidden()
         embeds = self.word_embeds(sentence).view(len(sentence), 1, -1)
-        mine_embed = embed("ipa", input, embedded).unsqueeze(1)
+        mine_embed = embed("one_hot", input, embedded).unsqueeze(1)
         lstm_out, self.hidden = self.lstm(mine_embed, self.hidden)
         lstm_out = lstm_out.view(len(sentence), self.hidden_dim)
         lstm_feats = self.hidden2tag(lstm_out)
@@ -135,7 +135,7 @@ with torch.no_grad():
     precheck_sent = prepare_sequence(training_data[0][0], word_to_ix)
     precheck_tags = torch.tensor([tag_to_ix[t] for t in training_data[0][1]], dtype=torch.long)
 
-for epoch in range(100):
+for epoch in range(1):
     for sentence, tags in training_data:
         model.zero_grad()
         sentence_in = prepare_sequence(sentence, word_to_ix)
@@ -149,11 +149,11 @@ with torch.no_grad():
     precheck_sent = prepare_sequence(training_data[0][0], word_to_ix)
     print(training_data[0][0])
     print(precheck_sent)
-    print(model(precheck_sent))
+    print(model(precheck_sent,training_data[0][0]))
 
 while True:
     input_sentence = input("Enter a sentence: ").split()
     input_word = [(char) for char in input_sentence[0]]
     precheck_sent = prepare_sequence(input_word, word_to_ix)
     print(precheck_sent)
-    print(model(precheck_sent))
+    print(model(precheck_sent,input_word))
