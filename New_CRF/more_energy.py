@@ -136,6 +136,7 @@ with torch.no_grad():
     precheck_tags = torch.tensor([tag_to_ix[t] for t in training_data[0][1]], dtype=torch.long)
 
 for epoch in range(1):
+    total_loss = 0
     for sentence, tags in training_data:
         model.zero_grad()
         sentence_in = prepare_sequence(sentence, word_to_ix)
@@ -143,7 +144,8 @@ for epoch in range(1):
         loss = model.neg_log_likelihood(sentence_in, targets, sentence)
         loss.backward()
         optimizer.step()
-    print(f"Epoch [{epoch}], Loss: {loss}")
+        total_loss += loss.item()
+    print(f"Epoch [{epoch}], Loss: {total_loss/1000 :.2f}")
 
 with torch.no_grad():
     precheck_sent = prepare_sequence(training_data[0][0], word_to_ix)
