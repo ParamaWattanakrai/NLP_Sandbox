@@ -3,6 +3,8 @@ import torch
 import torch.autograd as autograd
 import torch.nn as nn
 import torch.optim as optim
+from utils import DataLoader, embed
+embedded = DataLoader()
 
 torch.manual_seed(1)
 
@@ -58,10 +60,11 @@ class BiLSTM_CRF(nn.Module):
         alpha = log_sum_exp(terminal_var)
         return alpha
 
-    def _get_lstm_features(self, sentence):
+    def _get_lstm_features(self, sentence, input):
         self.hidden = self.init_hidden()
         embeds = self.word_embeds(sentence).view(len(sentence), 1, -1)
-        lstm_out, self.hidden = self.lstm(embeds, self.hidden)
+        mine_embed = embed("ipa", input, embedded).unsqueeze(1)
+        lstm_out, self.hidden = self.lstm(mine_embed, self.hidden)
         lstm_out = lstm_out.view(len(sentence), self.hidden_dim)
         lstm_feats = self.hidden2tag(lstm_out)
         return lstm_feats
@@ -101,20 +104,20 @@ class BiLSTM_CRF(nn.Module):
         best_path.reverse()
         return path_score, best_path
 
-    def neg_log_likelihood(self, sentence, tags):
-        feats = self._get_lstm_features(sentence)
+    def neg_log_likelihood(self, sentence, tags, input):
+        feats = self._get_lstm_features(sentence,input)
         forward_score = self._forward_alg(feats)
         gold_score = self._score_sentence(feats, tags)
         return forward_score - gold_score
 
-    def forward(self, sentence):
-        lstm_feats = self._get_lstm_features(sentence)
+    def forward(self, sentence, input):
+        lstm_feats = self._get_lstm_features(sentence,input)
         score, tag_seq = self._viterbi_decode(lstm_feats)
         return score, tag_seq
 
 START_TAG = "<START>"
 STOP_TAG = "<STOP>"
-EMBEDDING_DIM = 5
+EMBEDDING_DIM = 68
 HIDDEN_DIM = 4
 
 word_to_ix = {}
@@ -131,14 +134,13 @@ optimizer = optim.SGD(model.parameters(), lr=0.01, weight_decay=1e-4)
 with torch.no_grad():
     precheck_sent = prepare_sequence(training_data[0][0], word_to_ix)
     precheck_tags = torch.tensor([tag_to_ix[t] for t in training_data[0][1]], dtype=torch.long)
-    print(model(precheck_sent))
 
-for epoch in range(1):
+for epoch in range(100):
     for sentence, tags in training_data:
         model.zero_grad()
         sentence_in = prepare_sequence(sentence, word_to_ix)
         targets = torch.tensor([tag_to_ix[t] for t in tags], dtype=torch.long)
-        loss = model.neg_log_likelihood(sentence_in, targets)
+        loss = model.neg_log_likelihood(sentence_in, targets, sentence)
         loss.backward()
         optimizer.step()
     print(f"Epoch [{epoch}], Loss: {loss}")
