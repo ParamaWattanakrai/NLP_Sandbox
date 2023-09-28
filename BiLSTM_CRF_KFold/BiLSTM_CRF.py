@@ -3,6 +3,8 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from sklearn.model_selection import KFold
+from utils import DataLoader, embed
+embedded = DataLoader()
 
 def argmax(vec):
     _, idx = torch.max(vec, 1)
@@ -62,10 +64,11 @@ class BiLSTM_CRF(nn.Module):
         alpha = log_sum_exp(terminal_var)
         return alpha
 
-    def _get_lstm_features(self, sentence):
+    def _get_lstm_features(self, sentence, input):
         self.hidden = self.init_hidden()
         embeds = self.word_embeds(sentence).view(len(sentence), 1, -1)
-        lstm_out, self.hidden = self.lstm(embeds, self.hidden)
+        mine_embed = embed("one_hot", input, embedded).unsqueeze(1)
+        lstm_out, self.hidden = self.lstm(mine_embed, self.hidden)
         lstm_out = lstm_out.view(len(sentence), self.hidden_dim)
         lstm_feats = self.hidden2tag(lstm_out)
         return lstm_feats
@@ -105,23 +108,23 @@ class BiLSTM_CRF(nn.Module):
         best_path.reverse()
         return path_score, best_path
 
-    def neg_log_likelihood(self, sentence, tags):
-        feats = self._get_lstm_features(sentence)
+    def neg_log_likelihood(self, sentence, tags, input):
+        feats = self._get_lstm_features(sentence,input)
         forward_score = self._forward_alg(feats)
         gold_score = self._score_sentence(feats, tags)
         return forward_score - gold_score
 
-    def forward(self, sentence):
-        lstm_feats = self._get_lstm_features(sentence)
+    def forward(self, sentence, input):
+        lstm_feats = self._get_lstm_features(sentence,input)
         score, tag_seq = self._viterbi_decode(lstm_feats)
         return score, tag_seq
 
 START_TAG = "<START>"
 STOP_TAG = "<STOP>"
-EMBEDDING_DIM = 5
+EMBEDDING_DIM = 68
 HIDDEN_DIM = 4
 
-num_epoch = 100
+num_epoch = 1
 num_kfold = 5 
 
 word_to_ix = {}
@@ -160,7 +163,7 @@ for fold, (train_index, test_index) in enumerate(kfold.split(training_data)):
             model.zero_grad()
             sentence_in = prepare_sequence(sentence, word_to_ix)
             targets = torch.tensor([tag_to_ix[t] for t in tags], dtype=torch.long)
-            loss = model.neg_log_likelihood(sentence_in, targets)
+            loss = model.neg_log_likelihood(sentence_in, targets, sentence)
             loss.backward()
             optimizer.step()
             total_loss += loss.item()
@@ -171,7 +174,7 @@ for fold, (train_index, test_index) in enumerate(kfold.split(training_data)):
     ix_to_tag = {v: k for k, v in tag_to_ix.items()}  
     for sentence, tags in test_data:
         precheck_sent = prepare_sequence(sentence, word_to_ix)
-        _, predicted_tags = model(precheck_sent)
+        _, predicted_tags = model(precheck_sent,sentence)
         predicted_tags = [ix_to_tag[ix] for ix in predicted_tags]
         total_correct += sum(p == t for p, t in zip(predicted_tags, tags))
         total_samples += len(tags)
@@ -202,7 +205,7 @@ for epoch in range(num_epoch):
         model.zero_grad()
         sentence_in = prepare_sequence(sentence, word_to_ix)
         targets = torch.tensor([tag_to_ix[t] for t in tags], dtype=torch.long)
-        loss = model.neg_log_likelihood(sentence_in, targets)
+        loss = model.neg_log_likelihood(sentence_in, targets, sentence)
         loss.backward()
         optimizer.step()
         total_loss += loss.item()
@@ -212,7 +215,7 @@ total_correct = 0
 total_samples = 0
 for sentence, tags in training_data:
     precheck_sent = prepare_sequence(sentence, word_to_ix)
-    _, predicted_tags = model(precheck_sent)
+    _, predicted_tags = model(precheck_sent,sentence)
     predicted_tags = [ix_to_tag[ix] for ix in predicted_tags]
     total_correct += sum(p == t for p, t in zip(predicted_tags, tags))
     total_samples += len(tags)
@@ -235,4 +238,4 @@ while True:
     input_word = [(char) for char in input_sentence[0]]
     precheck_sent = prepare_sequence(input_word, word_to_ix)
     print(precheck_sent)
-    print(model(precheck_sent))
+    print(model(precheck_sent,input_word))
