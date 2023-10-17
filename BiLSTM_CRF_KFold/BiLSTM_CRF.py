@@ -233,6 +233,11 @@ for key, value in results.items():
     sum += value
 print(f'Average: {sum/len(results.items()):.2f} %')
 
+torch.save(model.state_dict(), 'trained_BiLSTM_CR_model.pth')
+model = BiLSTM_CRF(len(word_to_ix), tag_to_ix, EMBEDDING_DIM, HIDDEN_DIM)
+model.load_state_dict(torch.load('trained_BiLSTM_CR_model.pth'))
+model.eval()
+
 while True:
     input_sentence = input("Enter a sentence: ").split()
     input_word = [(char) for char in input_sentence[0]]
