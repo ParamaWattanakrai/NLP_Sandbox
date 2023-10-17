@@ -125,7 +125,7 @@ EMBEDDING_DIM = 68
 HIDDEN_DIM = 4
 
 num_epoch = 1
-num_kfold = 5 
+num_kfold = 2
 
 word_to_ix = {}
 results = {}
@@ -232,6 +232,11 @@ for key, value in results.items():
     print(f'Fold {key}: {value:.2f} %')
     sum += value
 print(f'Average: {sum/len(results.items()):.2f} %')
+
+torch.save(model.state_dict(), 'trained_BiLSTM_CR_model.pth')
+model = BiLSTM_CRF(len(word_to_ix), tag_to_ix, EMBEDDING_DIM, HIDDEN_DIM)
+model.load_state_dict(torch.load('trained_BiLSTM_CR_model.pth'))
+model.eval()
 
 while True:
     input_sentence = input("Enter a sentence: ").split()

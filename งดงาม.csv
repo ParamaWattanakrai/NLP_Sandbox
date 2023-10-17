@@ -1,4 +1,3 @@
-data = """
 ผนัง,ผ,นัง,,,,,,
 ประชาธิปไตย,ประ,ชา,ธิป,ไตย,,,,
 อนาธิปไตย,อ,นา,ธิป,ไตย,,,,
@@ -2488,29 +2487,3 @@ data = """
 ยติภังค์,ย,ติ,ภังค์,,,,,
 ยถากรรม,ย,ถา,กรรม,,,,,
 อรรฆย์,อรรฆย์,,,,,,,
-"""
-
-lines = data.strip().split('\n')
-X_train = []
-Y_before = []
-labels = []
-
-for line in lines:
-    columns = line.split(',')
-    x_row = [col for col in columns[0] if col.strip() != '']
-    label = [col for col in columns[:1] if col.strip() != '']
-    y_row = [col for col in columns[1:] if col.strip() != ''] 
-    X_train.append(x_row)
-    Y_before.append(y_row)
-    labels.append(label)
-
-Y_train = []
-for row in Y_before:
-    y_row = []
-    for syl in row:
-        for i in range(len(syl)):
-            if i == 0:
-                y_row.append('B')
-            else:
-                y_row.append('I')
-    Y_train.append(y_row)
