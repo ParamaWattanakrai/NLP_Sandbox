@@ -1,10 +1,12 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from data.crf_segmentation import X_train, Y_train
+from data.crf_segmentation import X_train, Y_train, labels
 from torchcrf import CRF
 from utils import DataLoader, embed
 
+
+print(X_train)
 embedded = DataLoader()
 tag_to_idx = {}
 for sent_tags in Y_train:
@@ -35,10 +37,10 @@ for epoch in range(num_epochs):
     model.train()   
     total_loss = 0
     
-    for inputs, targets in zip(X_train, Y_train_idx):
+    for inputs, targets, label in zip(X_train, Y_train_idx, labels):
         bruh = embed("ipa", inputs, embedded).unsqueeze(0)
         targets = torch.tensor(targets).unsqueeze(0)
-        
+        print(label)
         optimizer.zero_grad()
         outputs = model(bruh)
         print(outputs.shape)

@@ -743,13 +743,16 @@ data = """
 lines = data.strip().split('\n')
 X_train = []
 Y_before = []
+labels = []
 
 for line in lines:
     columns = line.split(',')
     x_row = [col for col in columns[0] if col.strip() != '']
+    label = [col for col in columns[:1] if col.strip() != '']
     y_row = [col for col in columns[1:] if col.strip() != ''] 
     X_train.append(x_row)
     Y_before.append(y_row)
+    labels.append(label)
 
 Y_train = []
 for row in Y_before:
