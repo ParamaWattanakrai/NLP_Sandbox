@@ -124,8 +124,8 @@ STOP_TAG = "<STOP>"
 EMBEDDING_DIM = 68
 HIDDEN_DIM = 4
 
-num_epoch = 1
-num_kfold = 2
+num_epoch = 112
+num_kfold = 5
 
 word_to_ix = {}
 results = {}
@@ -142,7 +142,7 @@ for sentence, tags in training_data:
 tag_to_ix = {"B": 0, "I": 1, "O": 2, START_TAG: 3, STOP_TAG: 4}
 kfold = KFold(n_splits=num_kfold,random_state=True ,shuffle=True)
 
-print('--------------------------------')
+print('--------------------------------') #comment to load start
 for fold, (train_index, test_index) in enumerate(kfold.split(training_data)):
     print(f'FOLD {fold+1}')
     print('--------------------------------')
@@ -233,7 +233,7 @@ for key, value in results.items():
     sum += value
 print(f'Average: {sum/len(results.items()):.2f} %')
 
-torch.save(model.state_dict(), 'trained_BiLSTM_CR_model.pth')
+torch.save(model.state_dict(), 'trained_BiLSTM_CR_model.pth') #comment to load end
 model = BiLSTM_CRF(len(word_to_ix), tag_to_ix, EMBEDDING_DIM, HIDDEN_DIM)
 model.load_state_dict(torch.load('trained_BiLSTM_CR_model.pth'))
 model.eval()
