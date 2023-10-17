@@ -125,7 +125,7 @@ EMBEDDING_DIM = 68
 HIDDEN_DIM = 4
 
 num_epoch = 1
-num_kfold = 5 
+num_kfold = 2
 
 word_to_ix = {}
 results = {}
