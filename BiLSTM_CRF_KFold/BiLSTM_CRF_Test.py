@@ -122,7 +122,7 @@ class BiLSTM_CRF(nn.Module):
 START_TAG = "<START>"
 STOP_TAG = "<STOP>"
 EMBEDDING_DIM = 68
-HIDDEN_DIM = 4
+HIDDEN_DIM = 48
 
 num_epoch = 112
 num_kfold = 5
@@ -235,7 +235,7 @@ kfold = KFold(n_splits=num_kfold,random_state=True ,shuffle=True)
 
 # torch.save(model.state_dict(), 'trained_BiLSTM_CR_model.pth') #comment to load end
 model = BiLSTM_CRF(len(word_to_ix), tag_to_ix, EMBEDDING_DIM, HIDDEN_DIM)
-model.load_state_dict(torch.load('trained_BiLSTM_CR_model.pth'))
+model.load_state_dict(torch.load('trained_BiLSTM_CR_48_Hidden.pth'))
 model.eval()
 
 while True:
