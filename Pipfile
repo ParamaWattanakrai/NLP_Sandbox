@@ -7,9 +7,9 @@ name = "pypi"
 pytorch-crf = "*"
 numpy = "*"
 scikit-learn = "*"
-torch = "*"
 torchvision = "*"
 torchaudio = "*"
+torch = "*"
 
 [dev-packages]
 
