@@ -4,10 +4,12 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-torch = "*"
 pytorch-crf = "*"
 numpy = "*"
 scikit-learn = "*"
+torch = "*"
+torchvision = "*"
+torchaudio = "*"
 
 [dev-packages]
 

@@ -122,7 +122,7 @@ class BiLSTM_CRF(nn.Module):
 START_TAG = "<START>"
 STOP_TAG = "<STOP>"
 EMBEDDING_DIM = 68
-HIDDEN_DIM = 4
+HIDDEN_DIM = 48
 
 num_epoch = 112
 num_kfold = 5
